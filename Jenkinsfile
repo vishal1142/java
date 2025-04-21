@@ -15,11 +15,20 @@ pipeline {
             }
         }
 
-        stage('Unit Test maven') {
+        stage('Unit Test Maven') {
             steps {
                 script {
-                    echo 'Building the project...'
+                    echo 'Running unit tests...'
                     mvnTest()
+                }
+            }
+        }
+
+        stage('Integration Test Maven') {
+            steps {
+                script {
+                    echo 'Running integration tests...'
+                    mvnIntegration()
                 }
             }
         }
