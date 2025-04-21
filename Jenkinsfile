@@ -13,24 +13,26 @@ pipeline {
                     )
                 }
             }
-        }      
+        }
+
+        stage('Run Maven Tests') {
+            steps {
+                script {
+                    mvnTest() // This will call your defined method: def call() { sh 'mvn test' }
+                }
+            }
+        }
     }
 
     post {
         always {
-            script {
-                echo '✅ This will always run'
-            }
+            echo '✅ This will always run'
         }
         success {
-            script {
-                echo '🎉 This will run only if the pipeline is successful'
-            }
+            echo '🎉 Build & Tests Successful'
         }
         failure {
-            script {
-                echo '❌ This will run only if the pipeline fails'
-            }
+            echo '❌ Build or Tests Failed'
         }
     }
 }
