@@ -15,6 +15,14 @@ pipeline {
             }
         }      
     }
+    stage ('Unit Test maven') {
+        steps {
+            script {
+                echo 'Building the project...'
+                mvnTest()
+            }
+        }
+    }
 
     post {
         always {
