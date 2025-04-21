@@ -6,7 +6,8 @@ pipeline {
     environment {
         GIT_REPO = 'https://github.com/vishal1142/java.git'
         GIT_BRANCH = 'main'
-        JAVA_HOME = '/usr/lib/jvm/java-11-openjdk-amd64' // Set the correct Java home path
+        JAVA_HOME = '/usr/lib/jvm/java-11-openjdk-amd64'  // Set the correct Java home path
+        PATH = "${JAVA_HOME}/bin:${env.PATH}"  // Ensure Java binaries are in the PATH
     }
 
     stages {
