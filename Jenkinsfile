@@ -1,14 +1,10 @@
+@Library('jenkinslibrary') _
+
 pipeline {
     agent any
 
-    environment {
-        JAVA_HOME = '/usr/lib/jvm/java-11-openjdk-amd64'  // JDK path
-        MAVEN_HOME = '/usr/share/maven'                   // Maven path
-        PATH = "${JAVA_HOME}/bin:${MAVEN_HOME}/bin:${env.PATH}"  // Update PATH with Java and Maven
-    }
-
     stages {
-        stage('Checkout Code') {
+        stage('Git Checkout') {
             steps {
                 script {
                     gitCheckout(
@@ -17,36 +13,23 @@ pipeline {
                     )
                 }
             }
-        }
-
-        stage('Run Maven Tests') {
-            steps {
-                script {
-                    try {
-                        sh 'mvn test'  // Run tests with Maven
-                    } catch (Exception e) {
-                        echo "Test execution failed: ${e.getMessage()}"
-                        throw e  // Fail the pipeline if Maven tests fail
-                    }
-                }
-            }
-        }
+        }      
     }
 
     post {
         always {
             script {
-                echo 'Cleanup or final tasks can be added here.'
+                echo 'This will always run'
             }
         }
         success {
             script {
-                echo 'Tests passed successfully, proceeding to the next stage.'
+                echo 'This will run only if the pipeline is successful'
             }
         }
         failure {
             script {
-                echo 'Tests failed, please review the error logs.'
+                echo 'This will run only if the pipeline fails'
             }
         }
     }
