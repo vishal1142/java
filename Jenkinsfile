@@ -35,22 +35,23 @@ pipeline {
         }
 
         stage('Run Maven Tests') {
-            steps {
-                script {
-                    try {
-                        sh '''
-                            export JAVA_HOME=${JAVA_HOME}
-                            export PATH=$JAVA_HOME/bin:$PATH
-                            mvn test
-                        '''
-                    } catch (Exception e) {
-                        echo "Maven test stage failed: ${e.getMessage()}"
-                        throw e
-                    }
-                }
+    steps {
+        script {
+            try {
+                sh '''
+                    export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
+                    export PATH=$JAVA_HOME/bin:$PATH
+                    echo "Using java at: $(which java)"
+                    java -version
+                    /usr/bin/mvn test
+                '''
+            } catch (Exception e) {
+                echo "Maven test stage failed: ${e.getMessage()}"
+                throw e
             }
         }
     }
+}
 
     post {
         always {
