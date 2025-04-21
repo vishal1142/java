@@ -28,7 +28,7 @@ pipeline {
             steps {
                 script {
                     echo 'Running integration tests...'
-                    mvnIntegration()
+                    mvnIntegrationTest()
                 }
             }
         }
