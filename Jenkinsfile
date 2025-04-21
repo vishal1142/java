@@ -1,34 +1,29 @@
 @Library('jenkinslibrary') _
 
 pipeline {
-    agent {
-        docker {
-            image 'maven:3.9.6-eclipse-temurin-17'
-            args '-v $HOME/.m2:/root/.m2' // Cache Maven dependencies between builds
-        }
-    }
+    agent any
 
     environment {
-        GIT_REPO   = 'https://github.com/vishal1142/java.git'
+        GIT_REPO = 'https://github.com/vishal1142/java.git'
         GIT_BRANCH = 'main'
     }
 
     stages {
-        stage('Checkout Code') {
+        stage('Git Checkout') {
             steps {
                 script {
                     gitCheckout(
-                        branch: GIT_BRANCH,
-                        url: GIT_REPO
+                        branch: "${GIT_BRANCH}",
+                        url: "${GIT_REPO}"
                     )
                 }
             }
         }
 
-        stage('Run Unit Tests') {
+        stage('Run Maven Tests') {
             steps {
                 script {
-                    mvnTest() // Defined in your Jenkins shared library
+                    mvnTest() // Calls shared library step that runs `mvn test`
                 }
             }
         }
@@ -36,13 +31,19 @@ pipeline {
 
     post {
         always {
-            echo '✅ Always executed post-build step'
+            script {
+                echo 'This will always run'
+            }
         }
         success {
-            echo '🎉 Build and Tests Passed Successfully'
+            script {
+                echo 'This will run only if the pipeline is successful'
+            }
         }
         failure {
-            echo '❌ Build or Tests Failed'
+            script {
+                echo 'This will run only if the pipeline fails'
+            }
         }
     }
 }
