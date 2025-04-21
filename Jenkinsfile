@@ -7,7 +7,6 @@ pipeline {
         GIT_REPO = 'https://github.com/vishal1142/java.git'
         GIT_BRANCH = 'main'
         JAVA_HOME = '/usr/lib/jvm/java-11-openjdk-amd64'
-        PATH = "${JAVA_HOME}/bin:${env.PATH}"
     }
 
     stages {
@@ -25,8 +24,10 @@ pipeline {
         stage('Verify Java Setup') {
             steps {
                 sh '''
-                    echo "JAVA_HOME: $JAVA_HOME"
-                    echo "PATH: $PATH"
+                    echo "Verifying JAVA_HOME and java version..."
+                    export JAVA_HOME=${JAVA_HOME}
+                    export PATH=$JAVA_HOME/bin:$PATH
+                    echo "JAVA_HOME is: $JAVA_HOME"
                     which java
                     java -version
                 '''
@@ -37,8 +38,11 @@ pipeline {
             steps {
                 script {
                     try {
-                        // Use shared library or raw Maven command
-                        sh 'mvn test'
+                        sh '''
+                            export JAVA_HOME=${JAVA_HOME}
+                            export PATH=$JAVA_HOME/bin:$PATH
+                            mvn test
+                        '''
                     } catch (Exception e) {
                         echo "Maven test stage failed: ${e.getMessage()}"
                         throw e
