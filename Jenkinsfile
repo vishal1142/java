@@ -2,13 +2,13 @@ pipeline {
     agent any
 
     environment {
-        JAVA_HOME = '/usr/lib/jvm/java-11-openjdk-amd64'  // Path to your JDK installation
-        MAVEN_HOME = '/usr/share/maven'                   // Path to your Maven installation
-        PATH = "${JAVA_HOME}/bin:${MAVEN_HOME}/bin:${env.PATH}"  // Add Java and Maven to PATH
+        JAVA_HOME = '/usr/lib/jvm/java-11-openjdk-amd64'  // JDK path
+        MAVEN_HOME = '/usr/share/maven'                   // Maven path
+        PATH = "${JAVA_HOME}/bin:${MAVEN_HOME}/bin:${env.PATH}"  // Update PATH with Java and Maven
     }
 
     stages {
-        stage('Git Checkout') {
+        stage('Checkout Code') {
             steps {
                 script {
                     gitCheckout(
@@ -23,10 +23,10 @@ pipeline {
             steps {
                 script {
                     try {
-                        sh 'mvn test'  // Run Maven test after setting JAVA_HOME and MAVEN_HOME
+                        sh 'mvn test'  // Run tests with Maven
                     } catch (Exception e) {
-                        echo "Maven test stage failed: ${e.getMessage()}"
-                        throw e  // Fail the pipeline if Maven test fails
+                        echo "Test execution failed: ${e.getMessage()}"
+                        throw e  // Fail the pipeline if Maven tests fail
                     }
                 }
             }
@@ -36,17 +36,17 @@ pipeline {
     post {
         always {
             script {
-                echo 'This will always run'
+                echo 'Cleanup or final tasks can be added here.'
             }
         }
         success {
             script {
-                echo 'This will run only if the pipeline is successful'
+                echo 'Tests passed successfully, proceeding to the next stage.'
             }
         }
         failure {
             script {
-                echo 'This will run only if the pipeline fails'
+                echo 'Tests failed, please review the error logs.'
             }
         }
     }
