@@ -6,3 +6,4 @@ service docker start
 apt-get update
 apt-get install -y maven
 mvn -v
+apt-get update && apt-get install -y openjdk-11-jdk
