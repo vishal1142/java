@@ -23,7 +23,12 @@ pipeline {
         stage('Run Maven Tests') {
             steps {
                 script {
-                    mvnTest() // Calls shared library step that runs `mvn test`
+                    try {
+                        mvnTest() // Calls shared library step that runs `mvn test`
+                    } catch (Exception e) {
+                        echo "Maven test stage failed: ${e.getMessage()}"
+                        throw e // Fail the pipeline on error
+                    }
                 }
             }
         }
