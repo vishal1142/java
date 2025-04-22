@@ -54,14 +54,25 @@ pipeline {
             steps {
                 script {
                     echo 'Performing static code analysis with SonarQube...'
-                    // Call the shared library method for SonarQube static code analysis
                     staticCodeAnalysis(
-                        credentialsId: 'sonarqube-api', // Jenkins credentials ID for SonarQube
-                        sonarHostUrl: 'http://192.168.1.141:9000', // SonarQube host URL
-                        sonarProjectKey: 'java-jenkins-demo', // SonarQube project key
-                        sonarProjectName: 'Java Jenkins Demo', // SonarQube project name
-                        sonarProjectVersion: '1.0' // SonarQube project version
+                        credentialsId: 'sonarqube-api',
+                        sonarHostUrl: 'http://192.168.1.141:9000',
+                        sonarProjectKey: 'java-jenkins-demo',
+                        sonarProjectName: 'Java Jenkins Demo',
+                        sonarProjectVersion: '1.0'
                     )
+                }
+            }
+        }
+
+        stage('Quality Gate Check') {
+            when {
+                expression { params.action == 'create' }
+            }
+            steps {
+                script {
+                    echo 'Checking SonarQube Quality Gate status...'
+                    QualityGateStatus(credentialsId: 'sonarqube-api')
                 }
             }
         }

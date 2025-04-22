@@ -29,7 +29,7 @@ chown -R jenkins:jenkins /var/jenkins_home/workspace
 chmod -R 775 /var/jenkins_home/workspace
 # sonar stage fails due to local host
 ipconfig
-you will find ip and make changes in file http://192.168.1.141:9000
+you will find ip and make changes in file and also in manage jenkins http://192.168.1.141:9000
 
 
 
