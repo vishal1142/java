@@ -52,10 +52,10 @@ pipeline {
             steps {
 
                 when { expression {  params.action == 'create' } }
-                
+                 
                 script {
-                    echo 'Running integration tests...'
-                    mvnIntegrationTest()
+                    echo 'statiCodeAnalysis..'
+                    statiCodeAnalysis()
                 }
             }
         }
