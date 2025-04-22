@@ -39,6 +39,20 @@ pipeline {
 
         stage('Integration Test Maven') {
             steps {
+                when { expression {  params.action == 'create' } }
+                
+                script {
+                    echo 'Running integration tests...'
+                    mvnIntegrationTest()
+                }
+            }
+        }
+
+        stage('Static code analysis: SonarQube') {
+            steps {
+
+                when { expression {  params.action == 'create' } }
+                
                 script {
                     echo 'Running integration tests...'
                     mvnIntegrationTest()
