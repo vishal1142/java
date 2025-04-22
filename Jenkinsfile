@@ -4,7 +4,7 @@ pipeline {
     agent any
 
     parameters {
-        choice(name: 'action', choices: ['create', 'delete'], description: 'Choose create/Destroy')
+        choice(name: 'action', choices: ['create', 'delete'], description: 'Choose create or delete')
     }
 
     stages {
@@ -14,6 +14,7 @@ pipeline {
             }
             steps {
                 script {
+                    echo 'Checking out source code...'
                     gitCheckout(
                         branch: 'main',
                         url: 'https://github.com/vishal1142/java.git'
@@ -22,7 +23,7 @@ pipeline {
             }
         }
 
-        stage('Unit Test Maven') {
+        stage('Unit Test') {
             when {
                 expression { params.action == 'create' }
             }
@@ -34,7 +35,7 @@ pipeline {
             }
         }
 
-        stage('Integration Test Maven') {
+        stage('Integration Test') {
             when {
                 expression { params.action == 'create' }
             }
@@ -46,14 +47,14 @@ pipeline {
             }
         }
 
-        stage('Static code analysis: SonarQube') {
+        stage('Static Code Analysis (SonarQube)') {
             when {
                 expression { params.action == 'create' }
             }
             steps {
                 script {
-                    echo 'Static Code Analysis...'
-                    statiCodeAnalysis()
+                    echo 'Performing static code analysis with SonarQube...'
+                    staticCodeAnalysis() // Ensure this method exists in your shared library
                 }
             }
         }
@@ -64,10 +65,10 @@ pipeline {
             echo 'This will always run'
         }
         success {
-            echo 'This will run only if the pipeline is successful'
+            echo 'Pipeline succeeded!'
         }
         failure {
-            echo 'This will run only if the pipeline fails'
+            echo 'Pipeline failed.'
         }
     }
 }
