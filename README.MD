@@ -23,6 +23,11 @@ cd /var/jenkins_home/workspace
 rm -rf java && git clone https://github.com/vishal1142/java.git
 cd java && git pull origin main
 git clone https://github.com/vishal1142/java.git java-fresh
+# Step-by-Step Guide for Fixing the Git Issue in Your Jenkins Docker Container (72a9d8671613):
+docker exec -u root -it 72a9d8671613 bash
+chown -R jenkins:jenkins /var/jenkins_home/workspace
+chmod -R 775 /var/jenkins_home/workspace
+
 
 
 
