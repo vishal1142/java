@@ -39,6 +39,28 @@ http://192.168.1.100:8080/sonarqube-webhook/
 Secret
 sonarqube-webhook-2025
 
+# 🚨 What’s Happening:
+
+The waitForQualityGate() step blocks until SonarQube finishes analysis and sends a webhook back to Jenkins.
+
+If no webhook is received, Jenkins keeps waiting — indefinitely — even if the analysis is complete on the SonarQube side.
+
+🔍 Why Your Pipeline Is Stuck or Delayed:
+Webhook isn't reaching Jenkins:
+
+Most likely reason.
+
+Even though you’ve set http://192.168.1.100:8080/sonarqube-webhook/, the network might not be allowing SonarQube to reach Jenkins (firewall, Docker, etc).
+
+Jenkins URL config is wrong or inaccessible:
+
+Jenkins might not be reachable via http://192.168.1.100:8080 from inside the SonarQube container or host.
+
+You’re running Jenkins in Docker without port mapping:
+
+If Jenkins is containerized, make sure the host machine’s IP is correctly mapped and reachable.
+
+
 
 
 
