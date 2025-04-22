@@ -1,11 +1,21 @@
 @Library('jenkinslibrary') _
 
 pipeline {
+
     agent any
 
+    parameters{
+
+        choice(name: 'action', choices: 'create\ndelete', description: 'Choose create/Destroy')
+    }    
+
     stages {
+
+        when { expression {  params.action == 'create' } }
+
         stage('Git Checkout') {
             steps {
+                
                 script {
                     gitCheckout(
                         branch: 'main',
@@ -17,6 +27,9 @@ pipeline {
 
         stage('Unit Test Maven') {
             steps {
+            
+            when { expression {  params.action == 'create' } }
+
                 script {
                     echo 'Running unit tests...'
                     mvnTest()
