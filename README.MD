@@ -30,6 +30,14 @@ chmod -R 775 /var/jenkins_home/workspace
 # sonar stage fails due to local host
 ipconfig
 you will find ip and make changes in file and also in manage jenkins http://192.168.1.141:9000
+# QualityGateStatus error to configure in Sonarqube
+Create Webhook
+Name*
+sonarhooks
+URL*
+http://192.168.1.100:8080/sonarqube-webhook/
+Secret
+sonarqube-webhook-2025
 
 
 
