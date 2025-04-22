@@ -1,21 +1,18 @@
 @Library('jenkinslibrary') _
 
 pipeline {
-
     agent any
 
-    parameters{
-
-        choice(name: 'action', choices: 'create\ndelete', description: 'Choose create/Destroy')
-    }    
+    parameters {
+        choice(name: 'action', choices: ['create', 'delete'], description: 'Choose create/Destroy')
+    }
 
     stages {
-
-        when { expression {  params.action == 'create' } }
-
         stage('Git Checkout') {
+            when {
+                expression { params.action == 'create' }
+            }
             steps {
-                
                 script {
                     gitCheckout(
                         branch: 'main',
@@ -26,10 +23,10 @@ pipeline {
         }
 
         stage('Unit Test Maven') {
+            when {
+                expression { params.action == 'create' }
+            }
             steps {
-            
-            when { expression {  params.action == 'create' } }
-
                 script {
                     echo 'Running unit tests...'
                     mvnTest()
@@ -38,9 +35,10 @@ pipeline {
         }
 
         stage('Integration Test Maven') {
+            when {
+                expression { params.action == 'create' }
+            }
             steps {
-                when { expression {  params.action == 'create' } }
-                
                 script {
                     echo 'Running integration tests...'
                     mvnIntegrationTest()
@@ -49,12 +47,12 @@ pipeline {
         }
 
         stage('Static code analysis: SonarQube') {
+            when {
+                expression { params.action == 'create' }
+            }
             steps {
-
-                when { expression {  params.action == 'create' } }
-                 
                 script {
-                    echo 'statiCodeAnalysis..'
+                    echo 'Static Code Analysis...'
                     statiCodeAnalysis()
                 }
             }
@@ -63,19 +61,13 @@ pipeline {
 
     post {
         always {
-            script {
-                echo 'This will always run'
-            }
+            echo 'This will always run'
         }
         success {
-            script {
-                echo 'This will run only if the pipeline is successful'
-            }
+            echo 'This will run only if the pipeline is successful'
         }
         failure {
-            script {
-                echo 'This will run only if the pipeline fails'
-            }
+            echo 'This will run only if the pipeline fails'
         }
     }
 }
