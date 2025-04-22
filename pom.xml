@@ -11,9 +11,11 @@
     <name>java-jenkins-demo</name>
 
     <properties>
-        <!-- Set Java version to 1.8 or later -->
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
+        <sonar.projectKey>com.example:java-jenkins-demo</sonar.projectKey>
+        <sonar.host.url>http://localhost:9000</sonar.host.url> <!-- Replace with your SonarQube URL -->
+        <sonar.login>your-sonar-token</sonar.login> <!-- Replace with your actual token -->
     </properties>
 
     <dependencies>
@@ -27,7 +29,7 @@
 
     <build>
         <plugins>
-            <!-- Add Maven Compiler Plugin to specify Java version -->
+            <!-- Maven Compiler Plugin -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -36,6 +38,13 @@
                     <source>1.8</source>
                     <target>1.8</target>
                 </configuration>
+            </plugin>
+
+            <!-- SonarQube Scanner Plugin -->
+            <plugin>
+                <groupId>org.sonarsource.scanner.maven</groupId>
+                <artifactId>sonar-maven-plugin</artifactId>
+                <version>3.9.1.2184</version>
             </plugin>
         </plugins>
     </build>
