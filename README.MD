@@ -82,6 +82,7 @@ docker network inspect bridge
 or
 docker network ls
 docker inspect <network_name>
+NOw it now it works perfectly.
 
 
 
