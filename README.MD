@@ -60,7 +60,25 @@ You’re running Jenkins in Docker without port mapping:
 
 If Jenkins is containerized, make sure the host machine’s IP is correctly mapped and reachable.
 
-
+if bash: curl: command not found
+apt update && apt install curl -y
+curl -X POST http://192.168.1.100:8080/sonarqube-webhook/ -d '{}'
+if it is not accesible from sonar container to jenklins container then follow below steps
+Let's Fix It
+check container name with id 
+docker inspect <container-id> --format '{{.Name}}'
+you will get 
+72a9d8671613   jenkins/jenkins:lts-jdk11   ...   my-jenkins-server
+Create a Shared Docker Network
+docker network create jenkins-sonar-net
+1. Connect Both Containers to It
+docker network connect jenkins-sonar-net my-jenkins-server
+2. Connect my-sonarqube:
+docker network connect jenkins-sonar-net my-sonarqube
+3. Update the SonarQube Webhook
+http://my-jenkins-server:8080/sonarqube-webhook/
+4. ✅ Double-Check This
+docker network inspect bridge
 
 
 
