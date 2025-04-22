@@ -79,6 +79,10 @@ docker network connect jenkins-sonar-net my-sonarqube
 http://my-jenkins-server:8080/sonarqube-webhook/
 4. ✅ Double-Check This
 docker network inspect bridge
+or
+docker network ls
+docker inspect <network_name>
+
 
 
 
