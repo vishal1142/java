@@ -27,6 +27,10 @@ git clone https://github.com/vishal1142/java.git java-fresh
 docker exec -u root -it 72a9d8671613 bash
 chown -R jenkins:jenkins /var/jenkins_home/workspace
 chmod -R 775 /var/jenkins_home/workspace
+# sonar stage fails due to local host
+ipconfig
+you will find ip and make changes in file http://192.168.1.141:9000
+
 
 
 

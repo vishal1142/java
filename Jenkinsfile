@@ -57,7 +57,7 @@ pipeline {
                     // Call the shared library method for SonarQube static code analysis
                     staticCodeAnalysis(
                         credentialsId: 'sonarqube-api', // Jenkins credentials ID for SonarQube
-                        sonarHostUrl: 'http://localhost:9000', // SonarQube host URL
+                        sonarHostUrl: 'http://192.168.1.141:9000', // SonarQube host URL
                         sonarProjectKey: 'java-jenkins-demo', // SonarQube project key
                         sonarProjectName: 'Java Jenkins Demo', // SonarQube project name
                         sonarProjectVersion: '1.0' // SonarQube project version
