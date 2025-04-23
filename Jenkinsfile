@@ -76,6 +76,30 @@ pipeline {
                 }
             }
         }
+
+        stage('Build') {
+            when {
+                expression { params.action == 'create' }
+            }
+            steps {
+                script {
+                    echo 'Building the project...'
+                    mvnBuild()
+                }
+            }
+        }
+
+        stage('Cleanup') {
+            when {
+                expression { params.action == 'delete' }
+            }
+            steps {
+                script {
+                    echo 'Cleaning up resources...'
+                    cleanupResources()
+                }
+            }
+        }
     }
 
     post {
