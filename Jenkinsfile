@@ -3,15 +3,15 @@
 pipeline {
     agent any
 
-    parameters {
-        choice(name: 'action', choices: ['create', 'delete'], description: 'Choose create or delete')
-    }
-
     environment {
         JAVA_HOME = '/usr/lib/jvm/java-11-openjdk-amd64'
         PATH = "${env.JAVA_HOME}/bin:${env.PATH}"
     }
-    
+
+    parameters {
+        choice(name: 'action', choices: ['create', 'delete'], description: 'Choose create or delete')
+    }
+
     stages {
         stage('Git Checkout') {
             when {
