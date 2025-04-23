@@ -1,11 +1,11 @@
 @Library('jenkinslibrary') _
 
 pipeline {
-    agent any
-
-    environment {
-        JAVA_HOME = '/usr/lib/jvm/java-11-openjdk-amd64'
-        PATH = "${env.JAVA_HOME}/bin:${env.PATH}"
+    agent {
+        docker {
+            image 'maven:3.8.6-openjdk-11'
+            args '-v /root/.m2:/root/.m2' // Persist Maven dependencies cache
+        }
     }
 
     parameters {
