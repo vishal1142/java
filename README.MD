@@ -35,7 +35,7 @@ Create Webhook
 Name*
 sonarhooks
 URL*
-http://192.168.1.100:8080/sonarqube-webhook/
+http://192.168.1.141:8080/sonarqube-webhook/
 Secret
 sonarqube-webhook-2025
 
@@ -50,11 +50,11 @@ Webhook isn't reaching Jenkins:
 
 Most likely reason.
 
-Even though you’ve set http://192.168.1.100:8080/sonarqube-webhook/, the network might not be allowing SonarQube to reach Jenkins (firewall, Docker, etc).
+Even though you’ve set http://192.168.1.141:8080/sonarqube-webhook/, the network might not be allowing SonarQube to reach Jenkins (firewall, Docker, etc).
 
 Jenkins URL config is wrong or inaccessible:
 
-Jenkins might not be reachable via http://192.168.1.100:8080 from inside the SonarQube container or host.
+Jenkins might not be reachable via http://192.168.1.141:8080 from inside the SonarQube container or host.
 
 You’re running Jenkins in Docker without port mapping:
 
