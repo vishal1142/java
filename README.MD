@@ -83,6 +83,12 @@ or
 docker network ls
 docker inspect <network_name>
 NOw it now it works perfectly.
+Commit the container as a new image
+docker commit my-jenkins-server my-jenkins-server-backup
+docker commit my-jenkins-server my-jenkins-server-backup
+Run a new container with Docker socket mounted
+docker run -d --name my-jenkins-server-new -u root -p 8080:8080 -p 50000:50000 -v /var/run/docker.sock:/var/run/docker.sock -v jenkins_home:/var/jenkins_home my-jenkins-server-backup
+
 
 
 
