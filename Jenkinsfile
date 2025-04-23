@@ -3,26 +3,11 @@
 pipeline {
     agent any
 
+    parameters {
+        choice(name: 'action', choices: ['create', 'delete'], description: 'Choose create or delete')
+    }
+
     stages {
-        stage('Check Docker Permissions') {
-            steps {
-                script {
-                    // Check if Docker is available and accessible for Jenkins
-                    echo 'Checking Docker permissions...'
-                    try {
-                        // Check Docker version to ensure it’s available
-                        sh 'docker --version'
-
-                        // Attempt to set correct permissions for the Docker socket
-                        echo 'Fixing Docker permissions...'
-                        sh 'sudo chmod 666 /var/run/docker.sock'  // Adjust permissions for Docker socket
-                    } catch (Exception e) {
-                        error 'Docker permissions error: Jenkins cannot access Docker daemon. Please check Docker group permissions and ensure Docker is running.'
-                    }
-                }
-            }
-        }
-
         stage('Git Checkout') {
             when {
                 expression { params.action == 'create' }
