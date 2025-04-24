@@ -4,10 +4,12 @@ pipeline {
     agent any
 
     parameters {
-        choice(name: 'action', choices: ['create', 'delete'], description: 'Choose create or delete')
-        string(name: 'ImageName', description: "Name of the Docker image", defaultValue: 'javapp')
-        string(name: 'ImageTag', description: "Tag of the Docker image", defaultValue: 'v1')
-        string(name: 'DockerHubUser', description: "DockerHub username", defaultValue: 'awsdevops12345')
+    choice(name: 'action', choices: ['create', 'delete'], description: 'Choose create or delete')
+    string(name: 'ImageName', description: "Name of the Docker image", defaultValue: 'javapp')
+    string(name: 'ImageTag', description: "Tag of the Docker image", defaultValue: 'v1')
+    string(name: 'DockerHubUser', description: "DockerHub username", defaultValue: 'awsdevops12345')
+    string(name: 'DockerHubCredId', description: "Jenkins credentials ID for DockerHub", defaultValue: 'vishal')
+    
     }
 
     stages {
