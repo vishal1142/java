@@ -93,6 +93,64 @@ groupadd docker || true
 usermod -aG docker jenkins
 
 
+Thanks for the detailed output — it confirms exactly what’s missing.
+
+### 🔥 Root Cause:
+`/var/run/docker.sock` is **owned by group `root`**, not `docker`. That’s why your `jenkins` user can't access it, and also:  
+🔸 `usermod` isn't available for the `jenkins` user (as expected — only `root` can use it).
+
+---
+
+### ✅ Let’s Fix It As `root` (inside the container)
+
+1. **Switch to root user inside the container (you've done this):**
+```bash
+docker exec -u root -it my-jenkins-server bash
+```
+
+2. **Change the group of the Docker socket to `docker`:**
+```bash
+groupadd docker 2>/dev/null || true   # just in case it's not there
+chgrp docker /var/run/docker.sock
+chmod 660 /var/run/docker.sock
+```
+
+3. **Add `jenkins` user to the `docker` group:**
+```bash
+usermod -aG docker jenkins
+```
+
+4. **Verify:**
+```bash
+id jenkins
+```
+You should see:  
+`groups=1000(jenkins),999(docker)` (or similar).
+
+5. **Restart the container** so the group membership change takes effect:
+```bash
+exit
+docker restart my-jenkins-server
+```
+
+6. **Re-enter as jenkins and test:**
+```bash
+docker exec -u jenkins -it my-jenkins-server bash
+docker ps
+```
+
+---
+
+### ✅ BONUS: One-liner fix (run as root)
+If you're in a hurry and just want it fixed:
+```bash
+docker exec -u root my-jenkins-server bash -c "groupadd docker || true && usermod -aG docker jenkins && chgrp docker /var/run/docker.sock && chmod 660 /var/run/docker.sock"
+docker restart my-jenkins-server
+```
+
+Let me know how it goes! 🚀
+
+
 
 
 
