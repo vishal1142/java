@@ -120,17 +120,23 @@ pipeline {
 
         stage('Docker Image Build') {
             when { expression { params.action == 'create' } }
+                        
             steps {
                 script {
-                    echo 'Building the Docker image...'
+                    echo 'Performing Docker operations...'
                     try {
-                        dockerBuild(
+                        // Instantiate DockerHelper from shared library
+                        def docker = new org.mytools.DockerHelper(this)
+
+                        // Call the performDockerOperations method
+                        docker.performDockerOperations(
                             params.ImageName,
                             params.ImageTag,
-                            params.DockerHubUser
+                            params.DockerHubUser,
+                            params.DockerHubCredId
                         )
                     } catch (Exception e) {
-                        echo "Docker build failed: ${e.message}"
+                        echo "Docker operation failed: ${e.message}"
                         currentBuild.result = 'FAILURE'
                         throw e
                     }
