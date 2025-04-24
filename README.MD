@@ -92,6 +92,7 @@ docker run -d --name my-jenkins-server-new -u root -p 8080:8080 -p 50000:50000 -
 groupadd docker || true
 usermod -aG docker jenkins
 
+---------------------------------------------------------------------------------------------------------------------------------------------------
 
 Thanks for the detailed output — it confirms exactly what’s missing.
 
@@ -150,6 +151,84 @@ docker restart my-jenkins-server
 
 Let me know how it goes! 🚀
 
+---------------------------------------------------------------------------------------------------------------------------------------------------
+
+Looks like you're inside a container or a minimal Linux environment where the `vi` editor isn't installed. If you want to edit `trivy.sh`, you’ve got a few options:
+
+---
+
+### 🔧 **Option 1: Use `nano` (if available)**
+Try:
+```bash
+nano trivy.sh
+```
+
+If you get a similar error (`command not found`), it’s also not installed.
+
+---
+
+### 🛠 **Option 2: Install `vi` or `vim`**
+If you're able to install packages inside this environment (and have internet access), try:
+
+For **Debian/Ubuntu** based containers:
+```bash
+apt update && apt install -y vim
+```
+
+For **Alpine**:
+```bash
+apk add vim
+```
+
+For **CentOS/RHEL**:
+```bash
+yum install -y vim
+```
+
+---
+
+### ✍️ **Option 3: Echo script content**
+Quick and dirty way to write a small script:
+```bash
+echo -e '#!/bin/bash\ntrivy image your-image-name' > trivy.sh
+chmod +x trivy.sh
+```
+
+---
+
+### 🚀 Want to continue?
+
+Ah, you're getting `Permission denied` — that usually means the script doesn’t have execute permissions. Let's fix that.
+
+---
+
+### ✅ Step 1: Add execute permission
+Run this:
+```bash
+chmod +x trivy.sh
+```
+
+Then confirm with:
+```bash
+ls -l trivy.sh
+```
+
+You should see:
+```
+-rwxr-xr-x 1 root root ... trivy.sh
+```
+
+---
+
+### ✅ Step 2: Run the script again
+Now try:
+```bash
+./trivy.sh
+```
+# verify 
+trivy --version
+
+---------------------------------------------------------------------------------------------------------------------------------------------------
 
 
 
