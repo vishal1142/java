@@ -109,6 +109,24 @@ pipeline {
             }
         }
     }
+        // Trivy Scan Stage
+        stage('Trivy Scan') {
+            when {
+                expression { params.action == 'create' }
+            }
+            steps {
+                script {
+                    echo 'Scanning the Docker image for vulnerabilities...'
+                    // Call the trivy image scan function here
+                    dockerImageScan(
+                        ImageName: params.ImageName,
+                        ImageTag: params.ImageTag,
+                        DockerHubUser: params.DockerHubUser
+                    )
+                }
+            }
+        }
+    }
 
     post {
         always {
