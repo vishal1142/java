@@ -5,10 +5,10 @@ pipeline {
 
     parameters {
         choice(name: 'action', choices: ['create', 'delete'], description: 'Choose create or delete')
-        string(name: 'ImageName', description: "name of the docker build", defaultValue: 'javapp')
-        string(name: 'ImageTag', description: "tag of the docker build", defaultValue: 'v1')
-        string(name: 'DockerHubUser', description: "name of the Application", defaultValue: 'awsdevops12345')
-    }
+        string(name: 'ImageName', description: "Name of the Docker image", defaultValue: 'javapp')
+        string(name: 'ImageTag', description: "Tag of the Docker image", defaultValue: 'v1')
+        string(name: 'DockerHubUser', description: "DockerHub username", defaultValue: 'awsdevops12345')
+}
 
     stages {
         stage('Git Checkout') {
@@ -92,18 +92,21 @@ pipeline {
             }
         }
 
-        stage('Docker Image Build'){
-           when { expression {  params.action == 'create' } 
-           }
-           steps{
-               script{
-                    echo 'Building the project with docker...'
-                    dockerBuild()
 
-                    dockerBuild("${params.ImageName}","${params.ImageTag}","${params.AppName}")
-    //             }
-    //         }
-    //     }
+
+       stage('Docker Image Build') {
+          when { expression { params.action == 'create' }
+        }
+        steps {
+            script {
+                echo "Building the Docker image..."
+                dockerBuild(
+                    "${params.ImageName}",
+                    "${params.ImageTag}",
+                    "${params.DockerHubUser}"
+                }
+            }
+        }
 
 //        stage('Cleanup') {
 //             when {
@@ -113,9 +116,10 @@ pipeline {
 //                 script {
 //                     echo 'Cleaning up resources...'
 //                     cleanupResources()
-                }
-            }
-        }
+//             }
+//         }
+//     }
+
     }
 
     post {
