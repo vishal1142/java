@@ -98,10 +98,12 @@ pipeline {
             }
             steps {
                 script {
-                    echo 'Building Docker image...'
-                    def image = docker.build("awsdevops12345/javapp:v1")
+                    def fullImageName = "${params.DockerHubUser}/${params.ImageName}:${params.ImageTag}"
+                    echo "Building image: ${fullImageName}"
                     dockerBuild(
-                        imageName: fullImageName
+                        ImageName: params.ImageName,
+                        ImageTag: params.ImageTag,
+                        DockerHubUser: params.DockerHubUser
                     )
                 }
             }
