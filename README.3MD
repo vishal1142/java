@@ -4,33 +4,15 @@ pipeline {
     agent any
 
     parameters {
-        choice(
-            name: 'action',
-            choices: ['create', 'delete'],
-            description: 'Choose create or delete'
-        )
-        string(
-            name: 'ImageName',
-            defaultValue: 'javapp',
-            description: 'Name of the Docker image'
-        )
-        string(
-            name: 'ImageTag',
-            defaultValue: 'v1',
-            description: 'Tag of the Docker image'
-        )
-        string(
-            name: 'DockerHubUser',
-            defaultValue: 'awsdevops12345',
-            description: 'DockerHub username'
-        )
+        choice(name: 'action', choices: ['create', 'delete'], description: 'Choose create or delete')
+        string(name: 'ImageName', description: "Name of the Docker image", defaultValue: 'javapp')
+        string(name: 'ImageTag', description: "Tag of the Docker image", defaultValue: 'v1')
+        string(name: 'DockerHubUser', description: "DockerHub username", defaultValue: 'awsdevops12345')
     }
 
     stages {
         stage('Git Checkout') {
-            when {
-                expression { params.action == 'create' }
-            }
+            when { expression { params.action == 'create' } }
             steps {
                 script {
                     echo 'Checking out source code...'
@@ -43,9 +25,7 @@ pipeline {
         }
 
         stage('Unit Test') {
-            when {
-                expression { params.action == 'create' }
-            }
+            when { expression { params.action == 'create' } }
             steps {
                 script {
                     echo 'Running unit tests...'
@@ -55,9 +35,7 @@ pipeline {
         }
 
         stage('Integration Test') {
-            when {
-                expression { params.action == 'create' }
-            }
+            when { expression { params.action == 'create' } }
             steps {
                 script {
                     echo 'Running integration tests...'
@@ -67,9 +45,7 @@ pipeline {
         }
 
         stage('Static Code Analysis (SonarQube)') {
-            when {
-                expression { params.action == 'create' }
-            }
+            when { expression { params.action == 'create' } }
             steps {
                 script {
                     echo 'Performing static code analysis with SonarQube...'
@@ -85,9 +61,7 @@ pipeline {
         }
 
         stage('Quality Gate Check') {
-            when {
-                expression { params.action == 'create' }
-            }
+            when { expression { params.action == 'create' } }
             steps {
                 script {
                     echo 'Checking SonarQube Quality Gate status...'
@@ -97,9 +71,7 @@ pipeline {
         }
 
         stage('Maven Build') {
-            when {
-                expression { params.action == 'create' }
-            }
+            when { expression { params.action == 'create' } }
             steps {
                 script {
                     echo 'Building the project...'
@@ -109,21 +81,15 @@ pipeline {
         }
 
         stage('Docker Build') {
-            when {
-                expression { params.action == 'create' }
-            }
+            when { expression { params.action == 'create' } }
             steps {
                 script {
-                    echo 'Building Docker image...'
-                    dockerBuild(
-                        params.ImageName,
-                        params.ImageTag,
-                        params.DockerHubUser
-                    )
+                    dockerBuild("${params.ImageName}","${params.ImageTag}","${params.DockerHubUser}")
+                    echo 'Building the project...'
+                    dockerBuild()
                 }
             }
         }
-    }
 
     post {
         always {
