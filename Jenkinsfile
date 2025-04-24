@@ -108,7 +108,7 @@ pipeline {
                 }
             }
         }
-    }
+
         // Trivy Scan Stage
         stage('Trivy Scan') {
             when {
