@@ -4,26 +4,10 @@ pipeline {
     agent any
 
     parameters {
-        choice(
-            name: 'action',
-            choices: ['create', 'delete'],
-            description: 'Choose create or delete'
-        )
-        string(
-            name: 'ImageName',
-            defaultValue: 'javapp',
-            description: 'Name of the Docker image'
-        )
-        string(
-            name: 'ImageTag',
-            defaultValue: 'v1',
-            description: 'Tag of the Docker image'
-        )
-        string(
-            name: 'DockerHubUser',
-            defaultValue: 'awsdevops12345',
-            description: 'DockerHub username'
-        )
+        choice(name: 'action', choices: ['create', 'delete'], description: 'Choose create or delete')
+        string(name: 'ImageName', defaultValue: 'javapp', description: 'Name of the Docker image')
+        string(name: 'ImageTag', defaultValue: 'v1', description: 'Tag of the Docker image')
+        string(name: 'DockerHubUser', defaultValue: 'awsdevops12345', description: 'DockerHub username')
     }
 
     stages {
@@ -115,7 +99,7 @@ pipeline {
             steps {
                 script {
                     echo 'Building Docker image...'
-                    def fullImageName = "${params.DockerHubUser}/${params.ImageName}:${params.ImageTag}"
+                    def image = docker.build("awsdevops12345/javapp:v1")
                     dockerBuild(
                         imageName: fullImageName
                     )
