@@ -17,69 +17,36 @@ pipeline {
             steps {
                 script {
                     echo 'Checking out source code...'
-                    try {
-                        gitCheckout(
-                            branch: 'main',
-                            url: 'https://github.com/vishal1142/java.git'
-                        )
-                    } catch (Exception e) {
-                        echo "Git checkout failed: ${e.message}"
-                        currentBuild.result = 'FAILURE'
-                        throw e
-                    }
+                    checkoutGit('https://github.com/vishal1142/java.git', 'main')
                 }
             }
         }
 
-        stage('Unit Test') {
+        stage('Tests & Code Quality') {
             when { expression { params.action == 'create' } }
-            steps {
-                script {
-                    echo 'Running unit tests...'
-                    try {
-                        mvnTest()
-                    } catch (Exception e) {
-                        echo "Unit test failed: ${e.message}"
-                        currentBuild.result = 'FAILURE'
-                        throw e
+            parallel {
+                stage('Unit Test') {
+                    steps {
+                        script {
+                            echo 'Running unit tests...'
+                            runTests('unit')
+                        }
                     }
                 }
-            }
-        }
-
-        stage('Integration Test') {
-            when { expression { params.action == 'create' } }
-            steps {
-                script {
-                    echo 'Running integration tests...'
-                    try {
-                        mvnIntegrationTest()
-                    } catch (Exception e) {
-                        echo "Integration test failed: ${e.message}"
-                        currentBuild.result = 'FAILURE'
-                        throw e
+                stage('Integration Test') {
+                    steps {
+                        script {
+                            echo 'Running integration tests...'
+                            runTests('integration')
+                        }
                     }
                 }
-            }
-        }
-
-        stage('Static Code Analysis (SonarQube)') {
-            when { expression { params.action == 'create' } }
-            steps {
-                script {
-                    echo 'Performing static code analysis with SonarQube...'
-                    try {
-                        staticCodeAnalysis(
-                            credentialsId: 'sonarqube-api',
-                            sonarHostUrl: 'http://192.168.1.141:9000',
-                            sonarProjectKey: 'java-jenkins-demo',
-                            sonarProjectName: 'Java Jenkins Demo',
-                            sonarProjectVersion: '1.0'
-                        )
-                    } catch (Exception e) {
-                        echo "SonarQube analysis failed: ${e.message}"
-                        currentBuild.result = 'FAILURE'
-                        throw e
+                stage('Static Code Analysis (SonarQube)') {
+                    steps {
+                        script {
+                            echo 'Performing static code analysis with SonarQube...'
+                            performSonarQubeAnalysis()
+                        }
                     }
                 }
             }
@@ -90,13 +57,7 @@ pipeline {
             steps {
                 script {
                     echo 'Checking SonarQube Quality Gate status...'
-                    try {
-                        QualityGateStatus(credentialsId: 'sonarqube-api')
-                    } catch (Exception e) {
-                        echo "Quality Gate check failed: ${e.message}"
-                        currentBuild.result = 'FAILURE'
-                        throw e
-                    }
+                    checkQualityGate()
                 }
             }
         }
@@ -106,39 +67,17 @@ pipeline {
             steps {
                 script {
                     echo 'Building the project...'
-                    try {
-                        mvnBuild()
-                    } catch (Exception e) {
-                        echo "Build failed: ${e.message}"
-                        currentBuild.result = 'FAILURE'
-                        throw e
-                    }
+                    buildProject()
                 }
             }
         }
 
         stage('Docker Image Build') {
             when { expression { params.action == 'create' } }
-            
             steps {
                 script {
-                    echo 'Performing Docker operations...'
-                    try {
-                        // Instantiate DockerHelper from shared library
-                        def docker = new org.mytools.DockerHelper(this)
-
-                        // Call the performDockerOperations method
-                        docker.performDockerOperations(
-                            params.ImageName,
-                            params.ImageTag,
-                            params.DockerHubUser,
-                            params.DockerHubCredId
-                        )
-                    } catch (Exception e) {
-                        echo "Docker operation failed: ${e.message}"
-                        currentBuild.result = 'FAILURE'
-                        throw e
-                    }
+                    echo 'Building Docker image...'
+                    buildDockerImage()
                 }
             }
         }
@@ -146,7 +85,7 @@ pipeline {
 
     post {
         always {
-            echo 'This will always run'
+            echo 'This will always run, regardless of success or failure.'
         }
         success {
             echo 'Pipeline succeeded!'
@@ -157,7 +96,84 @@ pipeline {
     }
 }
 
+def checkoutGit(repoUrl, branch) {
+    try {
+        git url: repoUrl, branch: branch
+    } catch (Exception e) {
+        echo "Git checkout failed: ${e.message}"
+        currentBuild.result = 'FAILURE'
+        throw e
+    }
+}
 
+def runTests(testType) {
+    try {
+        if (testType == 'unit') {
+            mvnTest()
+        } else if (testType == 'integration') {
+            mvnIntegrationTest()
+        }
+    } catch (Exception e) {
+        echo "${testType.capitalize()} test failed: ${e.message}"
+        currentBuild.result = 'FAILURE'
+        throw e
+    }
+}
+
+def performSonarQubeAnalysis() {
+    try {
+        staticCodeAnalysis(
+            credentialsId: 'sonarqube-api',
+            sonarHostUrl: 'http://192.168.1.141:9000',
+            sonarProjectKey: 'java-jenkins-demo',
+            sonarProjectName: 'Java Jenkins Demo',
+            sonarProjectVersion: '1.0'
+        )
+    } catch (Exception e) {
+        echo "SonarQube analysis failed: ${e.message}"
+        currentBuild.result = 'FAILURE'
+        throw e
+    }
+}
+
+def checkQualityGate() {
+    try {
+        QualityGateStatus(credentialsId: 'sonarqube-api')
+    } catch (Exception e) {
+        echo "Quality Gate check failed: ${e.message}"
+        currentBuild.result = 'FAILURE'
+        throw e
+    }
+}
+
+def buildProject() {
+    try {
+        mvnBuild()
+    } catch (Exception e) {
+        echo "Build failed: ${e.message}"
+        currentBuild.result = 'FAILURE'
+        throw e
+    }
+}
+
+def buildDockerImage() {
+    try {
+        // Instantiate DockerHelper from shared library
+        def docker = new org.mytools.DockerHelper(this)
+
+        // Call the performDockerOperations method
+        docker.performDockerOperations(
+            params.ImageName,
+            params.ImageTag,
+            params.DockerHubUser,
+            params.DockerHubCredId
+        )
+    } catch (Exception e) {
+        echo "Docker operation failed: ${e.message}"
+        currentBuild.result = 'FAILURE'
+        throw e
+    }
+}
     //    stage('Cleanup') {
     //        when { expression { params.action == 'delete' } }
     //        steps {
