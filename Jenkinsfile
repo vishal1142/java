@@ -80,19 +80,19 @@ pipeline {
             }
         }
 
-//          stage('Docker Image Build') {
-//              when { expression { params.action == 'create' } }
-//              steps {
-//                  script {
-//                      echo 'Building the Docker image...'
-//                      dockerBuild(
-//                          params.ImageName,
-//                          params.ImageTag,
-//                          params.DockerHubUser
-//                      )
-//                  }
-//              }
-//          }
+          stage('Docker Image Build') {
+              when { expression { params.action == 'create' } }
+              steps {
+                  script {
+                      echo 'Building the Docker image...'
+                      dockerBuild(
+                          params.ImageName,
+                          params.ImageTag,
+                          params.DockerHubUser
+                    )
+                }
+            }
+        }
 
 //        stage('Cleanup') {
 //              when { expression { params.action == 'delete' } }
@@ -103,7 +103,7 @@ pipeline {
 //                  }
 //              }
 //          }
-//      }
+    }
 
     post {
         always {
