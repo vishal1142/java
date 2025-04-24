@@ -1,4 +1,4 @@
- @Library('jenkinslibrary') _
+@Library('jenkinslibrary') _
 
 pipeline {
     agent any
@@ -16,10 +16,16 @@ pipeline {
             steps {
                 script {
                     echo 'Checking out source code...'
-                    gitCheckout(
-                        branch: 'main',
-                        url: 'https://github.com/vishal1142/java.git'
-                    )
+                    try {
+                        gitCheckout(
+                            branch: 'main',
+                            url: 'https://github.com/vishal1142/java.git'
+                        )
+                    } catch (Exception e) {
+                        echo "Git checkout failed: ${e.message}"
+                        currentBuild.result = 'FAILURE'
+                        throw e
+                    }
                 }
             }
         }
@@ -29,7 +35,13 @@ pipeline {
             steps {
                 script {
                     echo 'Running unit tests...'
-                    mvnTest()
+                    try {
+                        mvnTest()
+                    } catch (Exception e) {
+                        echo "Unit test failed: ${e.message}"
+                        currentBuild.result = 'FAILURE'
+                        throw e
+                    }
                 }
             }
         }
@@ -39,7 +51,13 @@ pipeline {
             steps {
                 script {
                     echo 'Running integration tests...'
-                    mvnIntegrationTest()
+                    try {
+                        mvnIntegrationTest()
+                    } catch (Exception e) {
+                        echo "Integration test failed: ${e.message}"
+                        currentBuild.result = 'FAILURE'
+                        throw e
+                    }
                 }
             }
         }
@@ -49,13 +67,19 @@ pipeline {
             steps {
                 script {
                     echo 'Performing static code analysis with SonarQube...'
-                    staticCodeAnalysis(
-                        credentialsId: 'sonarqube-api',
-                        sonarHostUrl: 'http://192.168.1.186:9000',
-                        sonarProjectKey: 'java-jenkins-demo',
-                        sonarProjectName: 'Java Jenkins Demo',
-                        sonarProjectVersion: '1.0'
-                    )
+                    try {
+                        staticCodeAnalysis(
+                            credentialsId: 'sonarqube-api',
+                            sonarHostUrl: 'http://192.168.1.186:9000',
+                            sonarProjectKey: 'java-jenkins-demo',
+                            sonarProjectName: 'Java Jenkins Demo',
+                            sonarProjectVersion: '1.0'
+                        )
+                    } catch (Exception e) {
+                        echo "SonarQube analysis failed: ${e.message}"
+                        currentBuild.result = 'FAILURE'
+                        throw e
+                    }
                 }
             }
         }
@@ -65,7 +89,13 @@ pipeline {
             steps {
                 script {
                     echo 'Checking SonarQube Quality Gate status...'
-                    QualityGateStatus(credentialsId: 'sonarqube-api')
+                    try {
+                        QualityGateStatus(credentialsId: 'sonarqube-api')
+                    } catch (Exception e) {
+                        echo "Quality Gate check failed: ${e.message}"
+                        currentBuild.result = 'FAILURE'
+                        throw e
+                    }
                 }
             }
         }
@@ -75,7 +105,13 @@ pipeline {
             steps {
                 script {
                     echo 'Building the project...'
-                    mvnBuild()
+                    try {
+                        mvnBuild()
+                    } catch (Exception e) {
+                        echo "Build failed: ${e.message}"
+                        currentBuild.result = 'FAILURE'
+                        throw e
+                    }
                 }
             }
         }
@@ -85,24 +121,20 @@ pipeline {
             steps {
                 script {
                     echo 'Building the Docker image...'
-                    dockerBuild(
-                        params.ImageName,
-                        params.ImageTag,
-                        params.DockerHubUser
-                    )
+                    try {
+                        dockerBuild(
+                            params.ImageName,
+                            params.ImageTag,
+                            params.DockerHubUser
+                        )
+                    } catch (Exception e) {
+                        echo "Docker build failed: ${e.message}"
+                        currentBuild.result = 'FAILURE'
+                        throw e
+                    }
                 }
             }
         }
-
-    //    stage('Cleanup') {
-    //        when { expression { params.action == 'delete' } }
-    //        steps {
-    //            script {
-    //                echo 'Cleaning up resources...'
-    //                cleanupResources()
-    //            }
-    //        }
-    //    }
     }
 
     post {
@@ -117,3 +149,13 @@ pipeline {
         }
     }
 }
+
+    //    stage('Cleanup') {
+    //        when { expression { params.action == 'delete' } }
+    //        steps {
+    //            script {
+    //                echo 'Cleaning up resources...'
+    //                cleanupResources()
+    //            }
+    //        }
+    //    }
