@@ -1,4 +1,4 @@
-@Library('jenkinslibrary') _
+ @Library('jenkinslibrary') _
 
 pipeline {
     agent any
@@ -8,13 +8,11 @@ pipeline {
         string(name: 'ImageName', description: "Name of the Docker image", defaultValue: 'javapp')
         string(name: 'ImageTag', description: "Tag of the Docker image", defaultValue: 'v1')
         string(name: 'DockerHubUser', description: "DockerHub username", defaultValue: 'awsdevops12345')
-}
+    }
 
     stages {
         stage('Git Checkout') {
-            when {
-                expression { params.action == 'create' }
-            }
+            when { expression { params.action == 'create' } }
             steps {
                 script {
                     echo 'Checking out source code...'
@@ -27,9 +25,7 @@ pipeline {
         }
 
         stage('Unit Test') {
-            when {
-                expression { params.action == 'create' }
-            }
+            when { expression { params.action == 'create' } }
             steps {
                 script {
                     echo 'Running unit tests...'
@@ -39,9 +35,7 @@ pipeline {
         }
 
         stage('Integration Test') {
-            when {
-                expression { params.action == 'create' }
-            }
+            when { expression { params.action == 'create' } }
             steps {
                 script {
                     echo 'Running integration tests...'
@@ -51,9 +45,7 @@ pipeline {
         }
 
         stage('Static Code Analysis (SonarQube)') {
-            when {
-                expression { params.action == 'create' }
-            }
+            when { expression { params.action == 'create' } }
             steps {
                 script {
                     echo 'Performing static code analysis with SonarQube...'
@@ -69,9 +61,7 @@ pipeline {
         }
 
         stage('Quality Gate Check') {
-            when {
-                expression { params.action == 'create' }
-            }
+            when { expression { params.action == 'create' } }
             steps {
                 script {
                     echo 'Checking SonarQube Quality Gate status...'
@@ -81,9 +71,7 @@ pipeline {
         }
 
         stage('Build') {
-            when {
-                expression { params.action == 'create' }
-            }
+            when { expression { params.action == 'create' } }
             steps {
                 script {
                     echo 'Building the project...'
@@ -92,34 +80,29 @@ pipeline {
             }
         }
 
-
-
-       stage('Docker Image Build') {
-          when { expression { params.action == 'create' }
-        }
-        steps {
-            script {
-                echo "Building the Docker image..."
-                dockerBuild(
-                    "${params.ImageName}",
-                    "${params.ImageTag}",
-                    "${params.DockerHubUser}"
+        stage('Docker Image Build') {
+            when { expression { params.action == 'create' } }
+            steps {
+                script {
+                    echo 'Building the Docker image...'
+                    dockerBuild(
+                        params.ImageName,
+                        params.ImageTag,
+                        params.DockerHubUser
+                    )
                 }
             }
         }
 
-//        stage('Cleanup') {
-//             when {
-//                 expression { params.action == 'delete' }
-//             }
-//             steps {
-//                 script {
-//                     echo 'Cleaning up resources...'
-//                     cleanupResources()
-//             }
-//         }
-//     }
-
+    //    stage('Cleanup') {
+    //        when { expression { params.action == 'delete' } }
+    //        steps {
+    //            script {
+    //                echo 'Cleaning up resources...'
+    //                cleanupResources()
+    //            }
+    //        }
+    //    }
     }
 
     post {
