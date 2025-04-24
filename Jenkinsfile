@@ -70,7 +70,7 @@ pipeline {
                     try {
                         staticCodeAnalysis(
                             credentialsId: 'sonarqube-api',
-                            sonarHostUrl: 'http://192.168.1.186:9000',
+                            sonarHostUrl: 'http://192.168.1.141:9000',
                             sonarProjectKey: 'java-jenkins-demo',
                             sonarProjectName: 'Java Jenkins Demo',
                             sonarProjectVersion: '1.0'
