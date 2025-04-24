@@ -115,10 +115,9 @@ pipeline {
             steps {
                 script {
                     echo 'Building Docker image...'
+                    def fullImageName = "${params.DockerHubUser}/${params.ImageName}:${params.ImageTag}"
                     dockerBuild(
-                        params.ImageName,
-                        params.ImageTag,
-                        params.DockerHubUser
+                        imageName: fullImageName
                     )
                 }
             }
