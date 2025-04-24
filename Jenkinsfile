@@ -70,7 +70,7 @@ pipeline {
             }
         }
 
-        stage('Build') {
+        stage('Maven Build') {
             when { expression { params.action == 'create' } }
             steps {
                 script {
@@ -80,30 +80,30 @@ pipeline {
             }
         }
 
-        stage('Docker Image Build') {
-            when { expression { params.action == 'create' } }
-            steps {
-                script {
-                    echo 'Building the Docker image...'
-                    dockerBuild(
-                        params.ImageName,
-                        params.ImageTag,
-                        params.DockerHubUser
-                    )
-                }
-            }
-        }
+//          stage('Docker Image Build') {
+//              when { expression { params.action == 'create' } }
+//              steps {
+//                  script {
+//                      echo 'Building the Docker image...'
+//                      dockerBuild(
+//                          params.ImageName,
+//                          params.ImageTag,
+//                          params.DockerHubUser
+//                      )
+//                  }
+//              }
+//          }
 
-        stage('Cleanup') {
-            when { expression { params.action == 'delete' } }
-            steps {
-                script {
-                    echo 'Cleaning up resources...'
-                    cleanupResources()
-                }
-            }
-        }
-    }
+//        stage('Cleanup') {
+//              when { expression { params.action == 'delete' } }
+//              steps {
+//                  script {
+//                      echo 'Cleaning up resources...'
+//                      cleanupResources()
+//                  }
+//              }
+//          }
+//      }
 
     post {
         always {
