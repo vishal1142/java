@@ -86,7 +86,7 @@ pipeline {
             }
             steps {
                 script {
-                    echo 'Building the project...'
+                    echo 'Building the project with Maven...'
                     mvnBuild()
                 }
             }
@@ -99,7 +99,7 @@ pipeline {
             steps {
                 script {
                     def fullImageName = "${params.DockerHubUser}/${params.ImageName}:${params.ImageTag}"
-                    echo "Building image: ${fullImageName}"
+                    echo "Building Docker image: ${fullImageName}"
                     dockerBuild(
                         ImageName: params.ImageName,
                         ImageTag: params.ImageTag,
@@ -109,15 +109,13 @@ pipeline {
             }
         }
 
-        // Trivy Scan Stage
         stage('Trivy Scan') {
             when {
                 expression { params.action == 'create' }
             }
             steps {
                 script {
-                    echo 'Scanning the Docker image for vulnerabilities...'
-                    // Call the trivy image scan function here
+                    echo 'Scanning the Docker image for vulnerabilities using Trivy...'
                     dockerImageScan(
                         ImageName: params.ImageName,
                         ImageTag: params.ImageTag,
@@ -126,17 +124,33 @@ pipeline {
                 }
             }
         }
+
+        stage('Docker Push') {
+            when {
+                expression { params.action == 'create' }
+            }
+            steps {
+                script {
+                    echo 'Pushing Docker image to DockerHub...'
+                    DockerImagePush(
+                        params.ImageName,
+                        params.ImageTag,
+                        params.DockerHubUser
+                    )
+                }
+            }
+        }
     }
 
     post {
         always {
-            echo 'This will always run'
+            echo 'This will always run - Pipeline finished.'
         }
         success {
-            echo 'Pipeline succeeded!'
+            echo 'Pipeline succeeded successfully!'
         }
         failure {
-            echo 'Pipeline failed.'
+            echo 'Pipeline failed. Please check the errors.'
         }
     }
 }
