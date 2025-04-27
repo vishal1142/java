@@ -141,6 +141,18 @@ pipeline {
             }
         }
     }
+    
+    stage('Docker Cleanup') {
+    when {
+        expression { params.action == 'create' }
+    }
+    steps {
+        script {
+            echo 'Performing Docker cleanup...'
+            dockerCleanup()
+        }
+    }
+}
 
     post {
         always {
