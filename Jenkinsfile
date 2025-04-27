@@ -140,20 +140,20 @@ pipeline {
                 }
             }
         }
+
+        stage('Docker Cleanup') {
+            when {
+                expression { params.action == 'create' }
+            }
+            steps {
+                script {
+                    echo 'Performing Docker cleanup...'
+                    dockerCleanup()
+                }
+            }
+        }    
     }
     
-    stage('Docker Cleanup') {
-    when {
-        expression { params.action == 'create' }
-    }
-    steps {
-        script {
-            echo 'Performing Docker cleanup...'
-            dockerCleanup()
-        }
-    }
-}
-
     post {
         always {
             echo 'This will always run - Pipeline finished.'
