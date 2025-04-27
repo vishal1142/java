@@ -94,7 +94,6 @@ usermod -aG docker jenkins
 
 ---------------------------------------------------------------------------------------------------------------------------------------------------
 
-Thanks for the detailed output — it confirms exactly what’s missing.
 
 ### 🔥 Root Cause:
 `/var/run/docker.sock` is **owned by group `root`**, not `docker`. That’s why your `jenkins` user can't access it, and also:  
