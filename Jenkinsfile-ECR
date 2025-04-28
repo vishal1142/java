@@ -18,7 +18,7 @@ pipeline {
         ECR_REGISTRY = '131664697495.dkr.ecr.us-east-2.amazonaws.com'
         REPO_NAME = 'vishal'
     }
-
+    
     stages {
         stage('Git Checkout') {
             when {
@@ -156,20 +156,16 @@ pipeline {
             }
             steps {
                 script {
-                    // Authenticate to AWS ECR
+                    // Use the shared library function to authenticate
                     ecr.authenticateToECR('ecr-credentials', AWS_REGION, ECR_REGISTRY)
                 }
             }
         }
 
-        stage('Build and Push Docker Image to ECR') {
-            when {
-                expression { params.action == 'create' }
-            }
+        stage('Build and Push Docker Image') {
             steps {
                 script {
                     // Build and push the Docker image to ECR
-                    echo 'Building and pushing the Docker image to AWS ECR...'
                     sh '''
                         docker build -t ${REPO_NAME}:latest .
                         docker tag ${REPO_NAME}:latest ${ECR_REGISTRY}/${REPO_NAME}:latest
