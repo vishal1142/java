@@ -4,8 +4,8 @@ pipeline {
     agent any
 
     environment {
-        AWS_REGION = 'us-east-1'
-        ECR_REPOSITORY = 'your-ecr-repository'
+        AWS_REGION = 'us-east-2'
+        ECR_REPOSITORY = '131664697495.dkr.ecr.us-east-2.amazonaws.com'
         IMAGE_NAME = 'vishal'
         AWS_ACCOUNT_ID = '131664697495'
     }
@@ -18,12 +18,6 @@ pipeline {
         string(name: 'AWS_ACCOUNT_ID', defaultValue: '131664697495', description: 'AWS Account ID')
         string(name: 'REGION', defaultValue: 'us-east-2', description: 'AWS Region')
         string(name: 'ECR_REPO_NAME', defaultValue: 'vishal', description: 'ECR Repository Name')
-    }
-
-    environment {
-        AWS_REGION = 'us-east-2'
-        ECR_REGISTRY = '131664697495.dkr.ecr.us-east-2.amazonaws.com'
-        REPO_NAME = 'vishal'
     }
 
     stages {
