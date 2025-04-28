@@ -150,27 +150,14 @@ pipeline {
             }
         }
 
-        stage('Authenticate to AWS ECR') {
-            when {
-                expression { params.action == 'create' }
-            }
-            steps {
-                script {
-                    // Use the shared library function to authenticate
-                    ecr.authenticateToECR('ecr-credentials', AWS_REGION, ECR_REGISTRY)
-                }
-            }
-        }
-
         stage('Build and Push Docker Image') {
+            when {
+                expression { params.action == 'create' 
+            }
             steps {
                 script {
                     // Build and push the Docker image to ECR
-                    sh '''
-                        docker build -t ${REPO_NAME}:latest .
-                        docker tag ${REPO_NAME}:latest ${ECR_REGISTRY}/${REPO_NAME}:latest
-                        docker push ${ECR_REGISTRY}/${REPO_NAME}:latest
-                    '''
+                    dockerBuildECR("${params.AWS_ACCOUNT_ID}","${params.REGION}","${params.ECR_REPO_NAME}")
                 }
             }
         }
