@@ -152,6 +152,9 @@ pipeline {
         }
 
         stage('Login to ECR') {
+            when {
+                expression { params.action == 'create' }
+            }
             steps {
                 script {
                     withCredentials([usernamePassword(credentialsId: 'ecr-credentials', passwordVariable: 'AWS_SECRET_ACCESS_KEY', usernameVariable: 'AWS_ACCESS_KEY_ID')]) {
@@ -162,6 +165,25 @@ pipeline {
                 }
             }
         }
+        
+        stage('Push Docker Image to ECR') {
+            when {
+                expression { params.action == 'create' }
+            }
+            steps {
+                script {
+                    echo "Pushing Docker image to ECR: ${fullImageName}"
+                    dockerPushECR(
+                        ImageName: params.ImageName,
+                        ImageTag: params.ImageTag,
+                        AWS_ACCOUNT_ID: params.AWS_ACCOUNT_ID,
+                        REGION: params.REGION,
+                        ECR_REPO_NAME: params.ECR_REPO_NAME
+                    )
+                }
+            }
+        }
+
 
         // stage('Build ECR') {
         //     when {
