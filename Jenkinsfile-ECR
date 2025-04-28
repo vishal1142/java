@@ -18,7 +18,7 @@ pipeline {
         ECR_REGISTRY = '131664697495.dkr.ecr.us-east-2.amazonaws.com'
         REPO_NAME = 'vishal'
     }
-    
+
     stages {
         stage('Git Checkout') {
             when {
@@ -150,14 +150,14 @@ pipeline {
             }
         }
 
-        stage('Build and Push Docker Image') {
+        stage('Build ECR') {
             when {
-                expression { params.action == 'create' 
+                expression { params.action == 'create' }
             }
             steps {
                 script {
                     // Build and push the Docker image to ECR
-                    dockerBuildECR("${params.AWS_ACCOUNT_ID}","${params.REGION}","${params.ECR_REPO_NAME}")
+                    dockerBuildECR("${params.AWS_ACCOUNT_ID}", "${params.REGION}", "${params.ECR_REPO_NAME}")
                 }
             }
         }
