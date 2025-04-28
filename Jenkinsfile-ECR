@@ -13,11 +13,6 @@ pipeline {
         string(name: 'ECR_REPO_NAME', defaultValue: 'vishal', description: 'ECR Repository Name')
     }
 
-    environment {
-        AWS_ACCESS_KEY_ID = credentials('aws-access-credentials')
-        AWS_SECRET_ACCESS_KEY = credentials('aws-access-credentials')
-    }
-
     stages {
         stage('Git Checkout') {
             when {
@@ -167,16 +162,18 @@ pipeline {
             when {
                 expression { params.action == 'create' }
             }
+            environment {
+                AWS_ACCESS_KEY_ID = credentials('aws-access-credentials')
+                AWS_SECRET_ACCESS_KEY = credentials('aws-access-credentials')
+            }
             steps {
                 script {
                     echo "Pushing Docker image to AWS ECR..."
                     // Call the EcrBuildPush Groovy method for ECR build and push
-                    dockerbuildECR(
-                        awsAccountId: params.AWS_ACCOUNT_ID,
-                        region: params.REGION,
-                        ecrRepoName: params.ECR_REPO_NAME,
-                        imageTag: params.ImageTag
-                    )
+                    echo 'Authenticating Docker to AWS ECR...'
+                    sh """
+                        echo 'aD02!n6&' | docker login --username jenkins-user --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com
+                    """
                 }
             }
         }
