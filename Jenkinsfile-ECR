@@ -3,6 +3,13 @@
 pipeline {
     agent any
 
+    environment {
+        AWS_REGION = 'us-east-1'
+        ECR_REPOSITORY = 'your-ecr-repository'
+        IMAGE_NAME = 'vishal'
+        AWS_ACCOUNT_ID = '131664697495'
+    }
+
     parameters {
         choice(name: 'action', choices: ['create', 'delete'], description: 'Choose create or delete')
         string(name: 'ImageName', defaultValue: 'vishal', description: 'Name of the Docker image')
@@ -146,6 +153,18 @@ pipeline {
                         params.ImageTag,
                         params.DockerHubUser
                     )
+                }
+            }
+        }
+
+        stage('Login to ECR') {
+            steps {
+                script {
+                    withCredentials([usernamePassword(credentialsId: 'aws-credentials-id', passwordVariable: 'AWS_SECRET_ACCESS_KEY', usernameVariable: 'AWS_ACCESS_KEY_ID')]) {
+                        sh """
+                            aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com
+                        """
+                    }
                 }
             }
         }
