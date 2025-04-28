@@ -151,11 +151,14 @@ pipeline {
         }
 
         stage('Authenticate to AWS ECR') {
+            when {
+                expression { params.action == 'create' }
+            }
             steps {
                 script {
                     // Use the shared library function to authenticate
                     ecr.authenticateToECR('ecr-credentials', AWS_REGION, ECR_REGISTRY)
-                    }
+                    
                 }
             }
         }
