@@ -13,6 +13,12 @@ pipeline {
         string(name: 'ECR_REPO_NAME', defaultValue: 'vishal', description: 'ECR Repository Name')
     }
 
+    environment {
+        AWS_REGION = 'us-east-2'
+        ECR_REGISTRY = '131664697495.dkr.ecr.us-east-2.amazonaws.com'
+        REPO_NAME = 'vishal'
+    }
+    
     stages {
         stage('Git Checkout') {
             when {
@@ -145,34 +151,24 @@ pipeline {
         }
 
         stage('Authenticate to AWS ECR') {
-            when {
-                expression { params.action == 'create' }
-            }
             steps {
                 script {
-                    // Use Jenkins credentials securely to authenticate Docker to ECR
-                    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'your-aws-credentials-id']]) {
-                        echo 'Authenticating Docker to AWS ECR...'
-                        sh """
-                            aws ecr get-login-password --region ${params.REGION} | docker login --username AWS --password-stdin ${params.AWS_ACCOUNT_ID}.dkr.ecr.${params.REGION}.amazonaws.com
-                        """
+                    // Use the shared library function to authenticate
+                    ecr.authenticateToECR('ecr-credentials', AWS_REGION, ECR_REGISTRY)
                     }
                 }
             }
         }
 
-        stage('ECR Build and Push') {
-            when {
-                expression { params.action == 'create' }
-            }
+        stage('Build and Push Docker Image') {
             steps {
                 script {
-                    echo "Building and pushing Docker image to AWS ECR..."
-                    // Tag the Docker image for ECR
-                    sh """
-                        docker tag ${params.ImageName}:${params.ImageTag} ${params.AWS_ACCOUNT_ID}.dkr.ecr.${params.REGION}.amazonaws.com/${params.ECR_REPO_NAME}:${params.ImageTag}
-                        docker push ${params.AWS_ACCOUNT_ID}.dkr.ecr.${params.REGION}.amazonaws.com/${params.ECR_REPO_NAME}:${params.ImageTag}
-                    """
+                    // Build and push the Docker image to ECR
+                    sh '''
+                        docker build -t ${REPO_NAME}:latest .
+                        docker tag ${REPO_NAME}:latest ${ECR_REGISTRY}/${REPO_NAME}:latest
+                        docker push ${ECR_REGISTRY}/${REPO_NAME}:latest
+                    '''
                 }
             }
         }
