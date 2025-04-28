@@ -150,10 +150,13 @@ pipeline {
             }
             steps {
                 script {
-                    echo 'Authenticating Docker to AWS ECR...'
-                    sh """
-                        aws ecr get-login-password --region ${params.REGION} | docker login --username AWS --password-stdin ${params.AWS_ACCOUNT_ID}.dkr.ecr.${params.REGION}.amazonaws.com
-                    """
+                    // Use Jenkins credentials securely to authenticate Docker to ECR
+                    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'your-aws-credentials-id']]) {
+                        echo 'Authenticating Docker to AWS ECR...'
+                        sh """
+                            aws ecr get-login-password --region ${params.REGION} | docker login --username AWS --password-stdin ${params.AWS_ACCOUNT_ID}.dkr.ecr.${params.REGION}.amazonaws.com
+                        """
+                    }
                 }
             }
         }
@@ -162,17 +165,13 @@ pipeline {
             when {
                 expression { params.action == 'create' }
             }
-            environment {
-                AWS_ACCESS_KEY_ID = credentials('aws-access-credentials')
-                AWS_SECRET_ACCESS_KEY = credentials('aws-access-credentials')
-            }
             steps {
                 script {
-                    echo "Pushing Docker image to AWS ECR..."
-                    // Call the EcrBuildPush Groovy method for ECR build and push
-                    echo 'Authenticating Docker to AWS ECR...'
+                    echo "Building and pushing Docker image to AWS ECR..."
+                    // Tag the Docker image for ECR
                     sh """
-                        echo 'aD02!n6&' | docker login --username jenkins-user --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com
+                        docker tag ${params.ImageName}:${params.ImageTag} ${params.AWS_ACCOUNT_ID}.dkr.ecr.${params.REGION}.amazonaws.com/${params.ECR_REPO_NAME}:${params.ImageTag}
+                        docker push ${params.AWS_ACCOUNT_ID}.dkr.ecr.${params.REGION}.amazonaws.com/${params.ECR_REPO_NAME}:${params.ImageTag}
                     """
                 }
             }
