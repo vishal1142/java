@@ -152,16 +152,16 @@ pipeline {
         stage('Authenticate to AWS ECR') {
             when {
                 expression { params.action == 'create' }
-        }
-        steps {
-            script {
-                echo 'Authenticating Docker to AWS ECR...'
-                sh """
-                    aws ecr get-login-password --region ${params.REGION} | docker login --username AWS --password-stdin ${params.AWS_ACCOUNT_ID}.dkr.ecr.${params.REGION}.amazonaws.com
-              """
+            }
+            steps {
+                script {
+                    echo 'Authenticating Docker to AWS ECR...'
+                    sh """
+                        aws ecr get-login-password --region ${params.REGION} | docker login --username AWS --password-stdin ${params.AWS_ACCOUNT_ID}.dkr.ecr.${params.REGION}.amazonaws.com
+                    """
+                }
             }
         }
-    }
 
         stage('ECR Build and Push') {
             when {
