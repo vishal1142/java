@@ -5,9 +5,12 @@ pipeline {
 
     parameters {
         choice(name: 'action', choices: ['create', 'delete'], description: 'Choose create or delete')
-        string(name: 'ImageName', defaultValue: 'javapp', description: 'Name of the Docker image')
-        string(name: 'ImageTag', defaultValue: 'v1', description: 'Tag of the Docker image')
+        string(name: 'ImageName', defaultValue: 'vishal', description: 'Name of the Docker image')
+        string(name: 'ImageTag', defaultValue: 'latest', description: 'Tag of the Docker image')
         string(name: 'DockerHubUser', defaultValue: 'awsdevops12345', description: 'DockerHub username')
+        string(name: 'AWS_ACCOUNT_ID', defaultValue: '131664697495', description: 'AWS Account ID')
+        string(name: 'REGION', defaultValue: 'us-east-2', description: 'AWS Region')
+        string(name: 'ECR_REPO_NAME', defaultValue: 'vishal', description: 'ECR Repository Name')
     }
 
     stages {
@@ -86,7 +89,7 @@ pipeline {
             }
             steps {
                 script {
-                    echo 'Building the project...'
+                    echo 'Building the project with Maven...'
                     mvnBuild()
                 }
             }
@@ -99,7 +102,7 @@ pipeline {
             steps {
                 script {
                     def fullImageName = "${params.DockerHubUser}/${params.ImageName}:${params.ImageTag}"
-                    echo "Building image: ${fullImageName}"
+                    echo "Building Docker image: ${fullImageName}"
                     dockerBuild(
                         ImageName: params.ImageName,
                         ImageTag: params.ImageTag,
@@ -109,15 +112,13 @@ pipeline {
             }
         }
 
-        // Trivy Scan Stage
         stage('Trivy Scan') {
             when {
                 expression { params.action == 'create' }
             }
             steps {
                 script {
-                    echo 'Scanning the Docker image for vulnerabilities...'
-                    // Call the trivy image scan function here
+                    echo 'Scanning the Docker image for vulnerabilities using Trivy...'
                     dockerImageScan(
                         ImageName: params.ImageName,
                         ImageTag: params.ImageTag,
@@ -126,9 +127,8 @@ pipeline {
                 }
             }
         }
-    }
 
-        stage('Docker Push') {
+        stage('Docker Push to DockerHub') {
             when {
                 expression { params.action == 'create' }
             }
@@ -143,16 +143,17 @@ pipeline {
                 }
             }
         }
-    
+    }
+
     post {
         always {
-            echo 'This will always run'
+            echo 'This will always run - Pipeline finished.'
         }
         success {
-            echo 'Pipeline succeeded!'
+            echo 'Pipeline succeeded successfully!'
         }
         failure {
-            echo 'Pipeline failed.'
+            echo 'Pipeline failed. Please check the errors.'
         }
     }
 }
