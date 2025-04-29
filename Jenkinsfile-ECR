@@ -9,6 +9,8 @@ pipeline {
         ECR_REPOSITORY = '131664697495.dkr.ecr.us-east-2.amazonaws.com'
         IMAGE_NAME     = 'vishal'
         AWS_ACCOUNT_ID = '131664697495'
+        // DockerHub username (set as Jenkins credentials)
+        DOCKERHUB_USER = credentials('dockerhub-credentials-id')  // Reference to Jenkins credentials
     }
 
     parameters {
@@ -172,31 +174,43 @@ pipeline {
                 expression { params.action == 'create' }
             }
             steps {
-                withCredentials([usernamePassword(credentialsId: 'aws-ecr-creds', usernameVariable: 'AWS_ACCESS_KEY_ID', passwordVariable: 'AWS_SECRET_ACCESS_KEY')]) {
-                    script {
-                        def dockerhubImage = "${DOCKERHUB_USER}/${params.ImageName}:${params.ImageTag}"
-                        def ecrImage = "${AWS_ACCOUNT_ID}.dkr.ecr.${params.REGION}.amazonaws.com/${ECR_REPOSITORY}:${params.ImageTag}"
+                script {
+                    // DockerHub and AWS ECR configuration
+                    def dockerhubImage = "${DOCKERHUB_USER}/${params.ImageName}:${params.ImageTag}"
+                    def ecrImage = "${AWS_ACCOUNT_ID}.dkr.ecr.${params.REGION}.amazonaws.com/${ECR_REPOSITORY}:${params.ImageTag}"
 
-                        sh """
-                            echo "Logging into AWS ECR..."
-                            aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
-                            aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
-                            aws configure set region ${params.REGION}
+                    // Logging into AWS ECR and DockerHub, pulling and pushing the image
+                    try {
+                        echo "Logging into AWS ECR..."
+                        withCredentials([usernamePassword(credentialsId: 'aws-ecr-creds', usernameVariable: 'AWS_ACCESS_KEY_ID', passwordVariable: 'AWS_SECRET_ACCESS_KEY'),
+                                         usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKERHUB_USER', passwordVariable: 'DOCKERHUB_PASSWORD')]) {
 
-                            aws ecr get-login-password --region ${params.REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${params.REGION}.amazonaws.com
+                            // AWS ECR login
+                            sh """
+                                aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
+                                aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
+                                aws configure set region ${params.REGION}
+                                aws ecr get-login-password --region ${params.REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${params.REGION}.amazonaws.com
+                            """
 
-                            echo "Pulling image from DockerHub..."
-                            docker pull ${dockerhubImage}
+                            // Pull image from DockerHub
+                            echo "Pulling image from DockerHub: ${dockerhubImage}..."
+                            sh "docker pull ${dockerhubImage}"
 
-                            echo "Tagging image for ECR..."
-                            docker tag ${dockerhubImage} ${ecrImage}
+                            // Tag the image for ECR
+                            echo "Tagging Docker image for ECR..."
+                            sh "docker tag ${dockerhubImage} ${ecrImage}"
 
-                            echo "Pushing image to ECR..."
-                            docker push ${ecrImage}
+                            // Push the image to AWS ECR
+                            echo "Pushing image to ECR: ${ecrImage}..."
+                            sh "docker push ${ecrImage}"
 
-                            echo "Logout from Docker"
-                            docker logout ${AWS_ACCOUNT_ID}.dkr.ecr.${params.REGION}.amazonaws.com
-                        """
+                            // Logout from Docker
+                            echo "Logging out from Docker..."
+                            sh "docker logout ${AWS_ACCOUNT_ID}.dkr.ecr.${params.REGION}.amazonaws.com"
+                        }
+                    } catch (Exception e) {
+                        error "An error occurred during the image transfer to ECR: ${e.message}"
                     }
                 }
             }
