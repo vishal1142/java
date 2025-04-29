@@ -157,3 +157,29 @@ pipeline {
         }
     }
 }
+
+
+
+        // stage('Build ECR') {
+        //     when {
+        //         expression { params.action == 'create' }
+        //     }
+        //     steps {
+        //         script {
+        //             // Build and push the Docker image to ECR
+        //             dockerBuildECR("${params.AWS_ACCOUNT_ID}", "${params.REGION}", "${params.ECR_REPO_NAME}")
+        //         }
+        //     }
+        // }
+
+        // stage('Docker Cleanup') {
+        //     when {
+        //         expression { params.action == 'create' }
+        //     }
+        //     steps {
+        //         script {
+        //             echo 'Performing Docker cleanup...'
+        //             sh 'docker system prune -f'
+        //         }
+        //     }
+        // }

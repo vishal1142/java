@@ -167,55 +167,6 @@ pipeline {
             }
         }
         
-        stage('Push Docker Image to ECR') {
-            when {
-                expression { params.action == 'create' }
-            }
-            steps {
-                script {
-                    // Define the full image name and repository URL for ECR
-                    def fullImageName = "${params.ImageName}:${params.ImageTag}"
-                    def ecrRepoUrl = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${params.ECR_REPO_NAME}:${params.ImageTag}"
-                    
-                    echo "Pushing Docker image to ECR: ${ecrRepoUrl}"
-
-                    // Tag the Docker image with the ECR repository URL
-                    sh """
-                        docker tag ${fullImageName} ${ecrRepoUrl}
-                    """
-
-                    // Push the Docker image to ECR
-                    sh """
-                        docker push ${ecrRepoUrl}
-                    """
-                }
-            }
-        }
-
-
-        // stage('Build ECR') {
-        //     when {
-        //         expression { params.action == 'create' }
-        //     }
-        //     steps {
-        //         script {
-        //             // Build and push the Docker image to ECR
-        //             dockerBuildECR("${params.AWS_ACCOUNT_ID}", "${params.REGION}", "${params.ECR_REPO_NAME}")
-        //         }
-        //     }
-        // }
-
-        // stage('Docker Cleanup') {
-        //     when {
-        //         expression { params.action == 'create' }
-        //     }
-        //     steps {
-        //         script {
-        //             echo 'Performing Docker cleanup...'
-        //             sh 'docker system prune -f'
-        //         }
-        //     }
-        // }
     }
 
     post {
