@@ -158,6 +158,23 @@ pipeline {
                 }
             }
         }
+
+        stage('Docker Push to AWS ECR') {
+            when {
+                expression { params.action == 'create' }
+            }
+            steps {
+                script {
+                    echo 'Pushing Docker image to AWS ECR...'
+                    DockerImagePushToECR(
+                        params.ImageName,
+                        params.ImageTag,
+                        "${params.AWS_ACCOUNT_ID}.dkr.ecr.${params.REGION}.amazonaws.com",
+                        params.REGION
+                    )
+                }
+            }
+        }
     }
 
     post {
