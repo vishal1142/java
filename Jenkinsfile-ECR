@@ -1,15 +1,15 @@
 @Library('jenkinslibrary') _
-//
+
 pipeline {
     agent any
 
     environment {
         // AWS-related environment variables
         AWS_REGION     = 'us-east-2'
-        ECR_REPOSITORY = '131664697495.dkr.ecr.us-east-2.amazonaws.com'
+        ECR_REPOSITORY = 'vishal' // Replace with your ECR repository name
         IMAGE_NAME     = 'vishal'
         AWS_ACCOUNT_ID = '131664697495'
-        // DockerHub username (set as Jenkins credentials)
+        // DockerHub credentials (set as Jenkins credentials)
         DOCKERHUB_USER = credentials('dockerhub-credentials-id')  // Reference to Jenkins credentials
     }
 
@@ -138,7 +138,7 @@ pipeline {
             }
         }
 
-        stage('Docker Push') {
+        stage('Docker Push to DockerHub') {
             when {
                 expression { params.action == 'create' }
             }
@@ -154,7 +154,7 @@ pipeline {
             }
         }
 
-        stage('Login to ECR') {
+        stage('Login to AWS ECR') {
             when {
                 expression { params.action == 'create' }
             }
@@ -175,47 +175,22 @@ pipeline {
             }
             steps {
                 script {
-                    // DockerHub and AWS ECR configuration
                     def dockerhubImage = "${DOCKERHUB_USER}/${params.ImageName}:${params.ImageTag}"
                     def ecrImage = "${AWS_ACCOUNT_ID}.dkr.ecr.${params.REGION}.amazonaws.com/${ECR_REPOSITORY}:${params.ImageTag}"
 
-                    // Logging into AWS ECR and DockerHub, pulling and pushing the image
-                    try {
-                        echo "Logging into AWS ECR..."
-                        withCredentials([usernamePassword(credentialsId: 'aws-ecr-creds', usernameVariable: 'AWS_ACCESS_KEY_ID', passwordVariable: 'AWS_SECRET_ACCESS_KEY'),
-                                         usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKERHUB_USER', passwordVariable: 'DOCKERHUB_PASSWORD')]) {
+                    echo "Pulling image from DockerHub: ${dockerhubImage}..."
+                    sh "docker pull ${dockerhubImage}"
 
-                            // AWS ECR login
-                            sh """
-                                aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
-                                aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
-                                aws configure set region ${params.REGION}
-                                aws ecr get-login-password --region ${params.REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${params.REGION}.amazonaws.com
-                            """
+                    echo "Tagging image for ECR: ${ecrImage}..."
+                    sh "docker tag ${dockerhubImage} ${ecrImage}"
 
-                            // Pull image from DockerHub
-                            echo "Pulling image from DockerHub: ${dockerhubImage}..."
-                            sh "docker pull ${dockerhubImage}"
+                    echo "Pushing image to AWS ECR: ${ecrImage}..."
+                    sh "docker push ${ecrImage}"
 
-                            // Tag the image for ECR
-                            echo "Tagging Docker image for ECR..."
-                            sh "docker tag ${dockerhubImage} ${ecrImage}"
-
-                            // Push the image to AWS ECR
-                            echo "Pushing image to ECR: ${ecrImage}..."
-                            sh "docker push ${ecrImage}"
-
-                            // Logout from Docker
-                            echo "Logging out from Docker..."
-                            sh "docker logout ${AWS_ACCOUNT_ID}.dkr.ecr.${params.REGION}.amazonaws.com"
-                        }
-                    } catch (Exception e) {
-                        error "An error occurred during the image transfer to ECR: ${e.message}"
-                    }
+                    echo "Successfully pushed Docker image to ECR"
                 }
             }
         }
-
     }
 
     post {
