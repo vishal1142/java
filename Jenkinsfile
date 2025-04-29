@@ -1,4 +1,4 @@
-@Library('jenkinslibrary') _
+@Library('jenkinslibrary@master') _
 
 pipeline {
     agent any
@@ -165,17 +165,17 @@ pipeline {
             }
             steps {
                 script {
-                    echo 'Pushing Docker image to AWS ECR...'
-                    DockerImagePushToECR(
-                        params.ImageName,
-                        params.ImageTag,
-                        "${params.AWS_ACCOUNT_ID}.dkr.ecr.${params.REGION}.amazonaws.com",
-                        params.REGION
+                    def dockerPushEcr = load 'jenkins/scripts/dockerPushEcr.groovy'
+                    dockerPushEcr(
+                        AWS_ACCOUNT_ID: params.AWS_ACCOUNT_ID,
+                        REGION: params.REGION,
+                        ECR_REPO_NAME: params.ECR_REPO_NAME,
+                        ImageTag: params.ImageTag,
+                        ImageName: params.ImageName
                     )
                 }
             }
         }
-    }
 
     post {
         always {
