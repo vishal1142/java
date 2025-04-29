@@ -152,8 +152,45 @@ pipeline {
                 }
             }
         }    
-    }
     
+        stage('ECR Push') {
+            when {
+                expression { params.action == 'create' }
+            }
+            steps {
+                script {
+                    def awsRegion = 'us-east-1' // change if needed
+                    def ecrRepo = "${params.ImageName}"
+                    def imageTag = "${params.ImageTag}"
+                    def fullImageName = "${params.DockerHubUser}/${ecrRepo}:${imageTag}"
+
+                    withCredentials([usernamePassword(credentialsId: 'aws-ecr-creds', usernameVariable: 'AWS_ACCESS_KEY_ID', passwordVariable: 'AWS_SECRET_ACCESS_KEY')]) {
+                        echo 'Authenticating to AWS ECR...'
+                        sh """
+                            aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
+                            aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
+                            aws configure set region ${awsRegion}
+
+                            aws ecr get-login-password --region ${awsRegion} | docker login --username AWS --password-stdin \$(aws sts get-caller-identity --query "Account" --output text).dkr.ecr.${awsRegion}.amazonaws.com
+
+                            # Create ECR repository if it doesn't exist
+                            aws ecr describe-repositories --repository-names ${ecrRepo} --region ${awsRegion} || \
+                            aws ecr create-repository --repository-name ${ecrRepo} --region ${awsRegion}
+
+                            # Tag Docker image
+                            account_id=\$(aws sts get-caller-identity --query "Account" --output text)
+                            ecr_url="\$account_id.dkr.ecr.${awsRegion}.amazonaws.com/${ecrRepo}"
+
+                            docker tag ${fullImageName} \$ecr_url:${imageTag}
+
+                            # Push Docker image to ECR
+                            docker push \$ecr_url:${imageTag}
+                        """
+                    }
+                }
+            }
+        }
+        
     post {
         always {
             echo 'This will always run - Pipeline finished.'
