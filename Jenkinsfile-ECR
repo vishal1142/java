@@ -4,6 +4,7 @@ pipeline {
     agent any
 
     environment {
+        // AWS-related environment variables
         AWS_REGION = 'us-east-2'
         ECR_REPOSITORY = '131664697495.dkr.ecr.us-east-2.amazonaws.com'
         IMAGE_NAME = 'vishal'
@@ -172,9 +173,11 @@ pipeline {
             }
             steps {
                 script {
-                    // Define fullImageName before using it
+                    // Define the full image name
                     def fullImageName = "${params.AWS_ACCOUNT_ID}.dkr.ecr.${params.REGION}.amazonaws.com/${params.ECR_REPO_NAME}:${params.ImageTag}"
                     echo "Pushing Docker image to ECR: ${fullImageName}"
+
+                    // Push Docker image to ECR
                     dockerImagePushToECR(
                         ImageName: params.ImageName,
                         ImageTag: params.ImageTag,
