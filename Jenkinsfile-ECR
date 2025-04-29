@@ -169,8 +169,8 @@ pipeline {
                     DockerImagePushToECR(
                         'my-app',
                         'v1.0.0',
-                        '123456789012.dkr.ecr.us-east-1.amazonaws.com',
-                        'us-east-1'
+                        "${params.AWS_ACCOUNT_ID}.dkr.ecr.${params.REGION}.amazonaws.com",
+                        "${params.REGION}"
                     )
                 }
             }
