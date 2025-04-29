@@ -175,7 +175,7 @@ pipeline {
                     // Define fullImageName before using it
                     def fullImageName = "${params.AWS_ACCOUNT_ID}.dkr.ecr.${params.REGION}.amazonaws.com/${params.ECR_REPO_NAME}:${params.ImageTag}"
                     echo "Pushing Docker image to ECR: ${fullImageName}"
-                    dockerPushECR(
+                    dockerImagePushToECR(
                         ImageName: params.ImageName,
                         ImageTag: params.ImageTag,
                         AWS_ACCOUNT_ID: params.AWS_ACCOUNT_ID,
