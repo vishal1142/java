@@ -159,7 +159,7 @@ pipeline {
             }
             steps {
                 script {
-                    def awsRegion = 'us-east-1' // change if needed
+                    def awsRegion = 'us-east-2' // change if needed
                     def ecrRepo = "${params.ImageName}"
                     def imageTag = "${params.ImageTag}"
                     def fullImageName = "${params.DockerHubUser}/${ecrRepo}:${imageTag}"
@@ -190,7 +190,7 @@ pipeline {
                 }
             }
         }
-        
+
     post {
         always {
             echo 'This will always run - Pipeline finished.'
