@@ -173,18 +173,21 @@ pipeline {
             }
             steps {
                 script {
-                    // Define the full image name
-                    def fullImageName = "${params.AWS_ACCOUNT_ID}.dkr.ecr.${params.REGION}.amazonaws.com/${params.ECR_REPO_NAME}:${params.ImageTag}"
-                    echo "Pushing Docker image to ECR: ${fullImageName}"
+                    // Define the full image name and repository URL for ECR
+                    def fullImageName = "${params.ImageName}:${params.ImageTag}"
+                    def ecrRepoUrl = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${params.ECR_REPO_NAME}:${params.ImageTag}"
+                    
+                    echo "Pushing Docker image to ECR: ${ecrRepoUrl}"
 
-                    // Push Docker image to ECR
-                    dockerImagePushToECR(
-                        ImageName: params.ImageName,
-                        ImageTag: params.ImageTag,
-                        AWS_ACCOUNT_ID: params.AWS_ACCOUNT_ID,
-                        REGION: params.REGION,
-                        ECR_REPO_NAME: params.ECR_REPO_NAME
-                    )
+                    // Tag the Docker image with the ECR repository URL
+                    sh """
+                        docker tag ${fullImageName} ${ecrRepoUrl}
+                    """
+
+                    // Push the Docker image to ECR
+                    sh """
+                        docker push ${ecrRepoUrl}
+                    """
                 }
             }
         }
