@@ -1,4 +1,4 @@
-@Library('jenkinslibrary') _
+@Library('jenkinslibrary@master') _
 
 pipeline {
     agent any
@@ -167,10 +167,10 @@ pipeline {
                 script {
                     echo 'Pushing Docker image to AWS ECR...'
                     DockerImagePushToECR(
-                        params.ImageName,
-                        params.ImageTag,
-                        "${params.AWS_ACCOUNT_ID}.dkr.ecr.${params.REGION}.amazonaws.com",
-                        params.REGION
+                        'my-app',
+                        'v1.0.0',
+                        '123456789012.dkr.ecr.us-east-1.amazonaws.com',
+                        'us-east-1'
                     )
                 }
             }
