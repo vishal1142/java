@@ -145,7 +145,6 @@ pipeline {
         }
     }
 
-
     stage('Login to AWS ECR') {
         when {
             expression { params.action == 'create' }
