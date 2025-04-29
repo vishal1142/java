@@ -3,16 +3,6 @@
 pipeline {
     agent any
 
-    environment {
-        // AWS-related environment variables
-        AWS_REGION     = 'us-east-2'
-        ECR_REPOSITORY = 'vishal' // Replace with your ECR repository name
-        IMAGE_NAME     = 'vishal'
-        AWS_ACCOUNT_ID = '131664697495'
-        // DockerHub credentials (set as Jenkins credentials)
-        // DOCKERHUB_USER = credentials('dockerhub-credentials-id')  // Reference to Jenkins credentials
-    }
-
     parameters {
         choice(name: 'action', choices: ['create', 'delete'], description: 'Choose create or delete')
         string(name: 'ImageName', defaultValue: 'vishal', description: 'Name of the Docker image')
