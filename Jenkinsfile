@@ -2,7 +2,7 @@
 
 pipeline {
     agent any
-
+// 
     parameters {
         choice(name: 'action', choices: ['create', 'delete'], description: 'Choose create or delete')
         string(name: 'ImageName', defaultValue: 'javapp', description: 'Name of the Docker image')
