@@ -2,7 +2,7 @@
 
 pipeline {
     agent any
-// 
+
     parameters {
         choice(name: 'action', choices: ['create', 'delete'], description: 'Choose create or delete')
         string(name: 'ImageName', defaultValue: 'javapp', description: 'Name of the Docker image')
@@ -86,7 +86,7 @@ pipeline {
             }
             steps {
                 script {
-                    echo 'Building the project with Maven...'
+                    echo 'Building the project...'
                     mvnBuild()
                 }
             }
@@ -99,7 +99,7 @@ pipeline {
             steps {
                 script {
                     def fullImageName = "${params.DockerHubUser}/${params.ImageName}:${params.ImageTag}"
-                    echo "Building Docker image: ${fullImageName}"
+                    echo "Building image: ${fullImageName}"
                     dockerBuild(
                         ImageName: params.ImageName,
                         ImageTag: params.ImageTag,
@@ -109,13 +109,15 @@ pipeline {
             }
         }
 
+        // Trivy Scan Stage
         stage('Trivy Scan') {
             when {
                 expression { params.action == 'create' }
             }
             steps {
                 script {
-                    echo 'Scanning the Docker image for vulnerabilities using Trivy...'
+                    echo 'Scanning the Docker image for vulnerabilities...'
+                    // Call the trivy image scan function here
                     dockerImageScan(
                         ImageName: params.ImageName,
                         ImageTag: params.ImageTag,
@@ -124,6 +126,7 @@ pipeline {
                 }
             }
         }
+    }
 
         stage('Docker Push') {
             when {
@@ -140,66 +143,16 @@ pipeline {
                 }
             }
         }
-
-        stage('Docker Cleanup') {
-            when {
-                expression { params.action == 'create' }
-            }
-            steps {
-                script {
-                    echo 'Performing Docker cleanup...'
-                    dockerCleanup()
-                }
-            }
-        }    
     
-        stage('ECR Push') {
-            when {
-                expression { params.action == 'create' }
-            }
-            steps {
-                script {
-                    def awsRegion = 'us-east-2' // change if needed
-                    def ecrRepo = "${params.ImageName}"
-                    def imageTag = "${params.ImageTag}"
-                    def fullImageName = "${params.DockerHubUser}/${ecrRepo}:${imageTag}"
-
-                    withCredentials([usernamePassword(credentialsId: 'aws-ecr-creds', usernameVariable: 'AWS_ACCESS_KEY_ID', passwordVariable: 'AWS_SECRET_ACCESS_KEY')]) {
-                        echo 'Authenticating to AWS ECR...'
-                        sh """
-                            aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
-                            aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
-                            aws configure set region ${awsRegion}
-
-                            aws ecr get-login-password --region ${awsRegion} | docker login --username AWS --password-stdin \$(aws sts get-caller-identity --query "Account" --output text).dkr.ecr.${awsRegion}.amazonaws.com
-
-                            # Create ECR repository if it doesn't exist
-                            aws ecr describe-repositories --repository-names ${ecrRepo} --region ${awsRegion} || \
-                            aws ecr create-repository --repository-name ${ecrRepo} --region ${awsRegion}
-
-                            # Tag Docker image
-                            account_id=\$(aws sts get-caller-identity --query "Account" --output text)
-                            ecr_url="\$account_id.dkr.ecr.${awsRegion}.amazonaws.com/${ecrRepo}"
-
-                            docker tag ${fullImageName} \$ecr_url:${imageTag}
-
-                            # Push Docker image to ECR
-                            docker push \$ecr_url:${imageTag}
-                        """
-                    }
-                }
-            }
-        }
-
     post {
         always {
-            echo 'This will always run - Pipeline finished.'
+            echo 'This will always run'
         }
         success {
-            echo 'Pipeline succeeded successfully!'
+            echo 'Pipeline succeeded!'
         }
         failure {
-            echo 'Pipeline failed. Please check the errors.'
+            echo 'Pipeline failed.'
         }
     }
 }
