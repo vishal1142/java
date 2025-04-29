@@ -167,8 +167,39 @@ pipeline {
             }
         }
         
-    }
+        stage('Push DockerHub Image to ECR') {
+            when { expression { params.action == 'create' } }
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'aws-ecr-creds', usernameVariable: 'AWS_ACCESS_KEY_ID', passwordVariable: 'AWS_SECRET_ACCESS_KEY')]) {
+                    script {
+                        def dockerhubImage = "${DOCKERHUB_USER}/${params.ImageName}:${params.ImageTag}"
+                        def ecrImage = "${AWS_ACCOUNT_ID}.dkr.ecr.${params.REGION}.amazonaws.com/${ECR_REPOSITORY}:${params.ImageTag}"
 
+                        sh """
+                            echo "Logging into AWS ECR..."
+                            aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
+                            aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
+                            aws configure set region ${params.REGION}
+
+                            aws ecr get-login-password --region ${params.REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${params.REGION}.amazonaws.com
+
+                            echo "Pulling image from DockerHub..."
+                            docker pull ${dockerhubImage}
+
+                            echo "Tagging image for ECR..."
+                            docker tag ${dockerhubImage} ${ecrImage}
+
+                            echo "Pushing image to ECR..."
+                            docker push ${ecrImage}
+
+                            echo "Logout from Docker"
+                            docker logout ${AWS_ACCOUNT_ID}.dkr.ecr.${params.REGION}.amazonaws.com
+                        """
+                    }
+                }
+            }
+        }
+          
     post {
         always {
             echo 'This will always run - Pipeline finished.'
