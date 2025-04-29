@@ -176,7 +176,7 @@ pipeline {
 
         stage('Cleanup Docker') {
             when {
-                expression { params.action == 'delete' }
+                expression { params.action == 'create' }
             }
             steps {
                 script {
