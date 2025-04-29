@@ -5,9 +5,9 @@ pipeline {
 
     environment {
         // AWS-related environment variables
-        AWS_REGION = 'us-east-2'
+        AWS_REGION     = 'us-east-2'
         ECR_REPOSITORY = '131664697495.dkr.ecr.us-east-2.amazonaws.com'
-        IMAGE_NAME = 'vishal'
+        IMAGE_NAME     = 'vishal'
         AWS_ACCOUNT_ID = '131664697495'
     }
 
@@ -166,9 +166,11 @@ pipeline {
                 }
             }
         }
-        
+
         stage('Push DockerHub Image to ECR') {
-            when { expression { params.action == 'create' } }
+            when {
+                expression { params.action == 'create' }
+            }
             steps {
                 withCredentials([usernamePassword(credentialsId: 'aws-ecr-creds', usernameVariable: 'AWS_ACCESS_KEY_ID', passwordVariable: 'AWS_SECRET_ACCESS_KEY')]) {
                     script {
@@ -199,7 +201,9 @@ pipeline {
                 }
             }
         }
-          
+
+    }
+
     post {
         always {
             echo 'This will always run - Pipeline finished.'
