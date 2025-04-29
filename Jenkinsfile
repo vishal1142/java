@@ -165,14 +165,12 @@ pipeline {
             }
             steps {
                 script {
-                    def dockerPushEcr = load 'jenkins/scripts/dockerPushEcr.groovy'
-                    dockerPushEcr(
-                        AWS_ACCOUNT_ID: params.AWS_ACCOUNT_ID,
-                        REGION: params.REGION,
-                        ECR_REPO_NAME: params.ECR_REPO_NAME,
-                        ImageTag: params.ImageTag,
-                        ImageName: params.ImageName
-                    )
+                    def ecrImageName = "${params.AWS_ACCOUNT_ID}.dkr.ecr.${params.REGION}.amazonaws.com/${params.ECR_REPO_NAME}:${params.ImageTag}"
+                    echo "Pushing Docker image to AWS ECR: ${ecrImageName}"
+                    // Tagging the image with the ECR repository name
+                    sh "docker tag ${params.ImageName}:${params.ImageTag} ${ecrImageName}"
+                    // Pushing the image to AWS ECR
+                    sh "docker push ${ecrImageName}"
                 }
             }
         }
