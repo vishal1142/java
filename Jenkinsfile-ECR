@@ -10,7 +10,7 @@ pipeline {
         IMAGE_NAME     = 'vishal'
         AWS_ACCOUNT_ID = '131664697495'
         // DockerHub credentials (set as Jenkins credentials)
-        DOCKERHUB_USER = credentials('dockerhub-credentials-id')  // Reference to Jenkins credentials
+        // DOCKERHUB_USER = credentials('dockerhub-credentials-id')  // Reference to Jenkins credentials
     }
 
     parameters {
