@@ -181,7 +181,7 @@ pipeline {
             steps {
                 script {
                     echo 'Cleaning up Docker images...'
-                    cleanupDockerImages(
+                    dockerCleanup(
                         ImageName: params.ImageName,
                         ImageTag: params.ImageTag
                     )
