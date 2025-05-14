@@ -1,0 +1,240 @@
+Access the Jenkins container:
+docker exec -u root -it <jenkins-container-id> bash
+apt-get update
+apt-get install -y docker.io
+service docker start
+apt-get update
+apt-get install -y maven
+mvn -v
+apt-get update && apt-get install -y openjdk-11-jdk
+apt-get install -y default-jdk
+export JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
+export PATH=$JAVA_HOME/bin:$PATH
+echo $JAVA_HOME
+sonartoken:squ_b0ea5d224d097948ec7a2506531a616d066febb4
+# inside jenkis container run these commands to see
+find / -name "pom.xml" 2>/dev/null
+/var/jenkins_home/workspace/java/pom.xml
+cd /var/jenkins_home/workspace/java
+mvn clean verify sonar:sonar
+# Install Git in Container because we are running job for sonarqube its not working it cant find pom.xml in container because jenkins is in the container
+apt-get update && apt-get install -y git
+cd /var/jenkins_home/workspace
+rm -rf java && git clone https://github.com/vishal1142/java.git
+cd java && git pull origin main
+git clone https://github.com/vishal1142/java.git java-fresh
+# Step-by-Step Guide for Fixing the Git Issue in Your Jenkins Docker Container (72a9d8671613):
+docker exec -u root -it 72a9d8671613 bash
+chown -R jenkins:jenkins /var/jenkins_home/workspace
+chmod -R 775 /var/jenkins_home/workspace
+# sonar stage fails due to local host
+ipconfig
+you will find ip and make changes in file and also in manage jenkins http://192.168.1.141:9000
+# QualityGateStatus error to configure in Sonarqube
+Create Webhook
+Name*
+sonarhooks
+URL*
+http://192.168.1.141:8080/sonarqube-webhook/
+Secret
+sonarqube-webhook-2025
+
+# 🚨 What’s Happening:
+
+The waitForQualityGate() step blocks until SonarQube finishes analysis and sends a webhook back to Jenkins.
+
+If no webhook is received, Jenkins keeps waiting — indefinitely — even if the analysis is complete on the SonarQube side.
+
+🔍 Why Your Pipeline Is Stuck or Delayed:
+Webhook isn't reaching Jenkins:
+
+Most likely reason.
+
+Even though you’ve set http://192.168.1.141:8080/sonarqube-webhook/, the network might not be allowing SonarQube to reach Jenkins (firewall, Docker, etc).
+
+Jenkins URL config is wrong or inaccessible:
+
+Jenkins might not be reachable via http://192.168.1.141:8080 from inside the SonarQube container or host.
+
+You’re running Jenkins in Docker without port mapping:
+
+If Jenkins is containerized, make sure the host machine’s IP is correctly mapped and reachable.
+
+if bash: curl: command not found
+apt update && apt install curl -y
+curl -X POST http://192.168.1.100:8080/sonarqube-webhook/ -d '{}'
+if it is not accesible from sonar container to jenklins container then follow below steps
+Let's Fix It
+check container name with id 
+docker inspect <container-id> --format '{{.Name}}'
+you will get 
+72a9d8671613   jenkins/jenkins:lts-jdk11   ...   my-jenkins-server
+Create a Shared Docker Network
+docker network create jenkins-sonar-net
+1. Connect Both Containers to It
+docker network connect jenkins-sonar-net my-jenkins-server
+2. Connect my-sonarqube:
+docker network connect jenkins-sonar-net my-sonarqube
+3. Update the SonarQube Webhook
+http://my-jenkins-server:8080/sonarqube-webhook/
+4. ✅ Double-Check This
+docker network inspect bridge
+or
+docker network ls
+docker inspect <network_name>
+NOw it now it works perfectly.
+Commit the container as a new image
+docker commit my-jenkins-server my-jenkins-server-backup
+docker commit my-jenkins-server my-jenkins-server-backup
+Run a new container with Docker socket mounted
+docker run -d --name my-jenkins-server-new -u root -p 8080:8080 -p 50000:50000 -v /var/run/docker.sock:/var/run/docker.sock -v jenkins_home:/var/jenkins_home my-jenkins-server-backup
+ Give Jenkins user Docker permissions
+groupadd docker || true
+usermod -aG docker jenkins
+
+---------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+### 🔥 Root Cause:
+`/var/run/docker.sock` is **owned by group `root`**, not `docker`. That’s why your `jenkins` user can't access it, and also:  
+🔸 `usermod` isn't available for the `jenkins` user (as expected — only `root` can use it).
+
+---
+
+### ✅ Let’s Fix It As `root` (inside the container)
+
+1. **Switch to root user inside the container (you've done this):**
+```bash
+docker exec -u root -it my-jenkins-server bash
+```
+
+2. **Change the group of the Docker socket to `docker`:**
+```bash
+groupadd docker 2>/dev/null || true   # just in case it's not there
+chgrp docker /var/run/docker.sock
+chmod 660 /var/run/docker.sock
+```
+
+3. **Add `jenkins` user to the `docker` group:**
+```bash
+usermod -aG docker jenkins
+```
+
+4. **Verify:**
+```bash
+id jenkins
+```
+You should see:  
+`groups=1000(jenkins),999(docker)` (or similar).
+
+5. **Restart the container** so the group membership change takes effect:
+```bash
+exit
+docker restart my-jenkins-server
+```
+
+6. **Re-enter as jenkins and test:**
+```bash
+docker exec -u jenkins -it my-jenkins-server bash
+docker ps
+```
+
+---
+
+### ✅ BONUS: One-liner fix (run as root)
+If you're in a hurry and just want it fixed:
+```bash
+docker exec -u root my-jenkins-server bash -c "groupadd docker || true && usermod -aG docker jenkins && chgrp docker /var/run/docker.sock && chmod 660 /var/run/docker.sock"
+docker restart my-jenkins-server
+```
+
+Let me know how it goes! 🚀
+
+---------------------------------------------------------------------------------------------------------------------------------------------------
+
+Looks like you're inside a container or a minimal Linux environment where the `vi` editor isn't installed. If you want to edit `trivy.sh`, you’ve got a few options:
+
+---
+
+### 🔧 **Option 1: Use `nano` (if available)**
+Try:
+```bash
+nano trivy.sh
+```
+
+If you get a similar error (`command not found`), it’s also not installed.
+
+---
+
+### 🛠 **Option 2: Install `vi` or `vim`**
+If you're able to install packages inside this environment (and have internet access), try:
+
+For **Debian/Ubuntu** based containers:
+```bash
+apt update && apt install -y vim
+```
+
+For **Alpine**:
+```bash
+apk add vim
+```
+
+For **CentOS/RHEL**:
+```bash
+yum install -y vim
+```
+
+---
+
+### ✍️ **Option 3: Echo script content**
+Quick and dirty way to write a small script:
+```bash
+echo -e '#!/bin/bash\ntrivy image your-image-name' > trivy.sh
+chmod +x trivy.sh
+```
+
+---
+
+### 🚀 Want to continue?
+
+Ah, you're getting `Permission denied` — that usually means the script doesn’t have execute permissions. Let's fix that.
+
+---
+
+### ✅ Step 1: Add execute permission
+Run this:
+```bash
+chmod +x trivy.sh
+```
+
+Then confirm with:
+```bash
+ls -l trivy.sh
+```
+
+You should see:
+```
+-rwxr-xr-x 1 root root ... trivy.sh
+```
+
+---
+
+### ✅ Step 2: Run the script again
+Now try:
+```bash
+./trivy.sh
+```
+# verify 
+trivy --version
+
+---------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+# Safer alternative using Eclipse Temurin
+FROM eclipse-temurin:21-jdk-jammy
+WORKDIR /app
+COPY ./target/*.jar /app.jar
+CMD ["java", "-jar", "app.jar"]
+
+---------------------------------------------------------------------------------------------------------------------------------------------------
+
