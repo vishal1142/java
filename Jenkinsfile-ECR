@@ -166,10 +166,11 @@ pipeline {
             steps {
                 script {
                     def ecrImageName = "${params.AWS_ACCOUNT_ID}.dkr.ecr.${params.REGION}.amazonaws.com/${params.ECR_REPO_NAME}:${params.ImageTag}"
+                    echo "Listing local Docker images before tagging:"
+                    sh "docker images"
+                    echo "Tagging Docker image for AWS ECR: ${ecrImageName}"
+                    sh "docker tag ${params.DockerHubUser}/${params.ImageName}:${params.ImageTag} ${ecrImageName}"
                     echo "Pushing Docker image to AWS ECR: ${ecrImageName}"
-                    // Tagging the image with the ECR repository name
-                    sh "docker tag ${params.ImageName}:${params.ImageTag} ${ecrImageName}"
-                    // Pushing the image to AWS ECR
                     sh "docker push ${ecrImageName}"
                 }
             }
@@ -188,3 +189,4 @@ pipeline {
         }
     }
 }
+ 

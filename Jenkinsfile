@@ -14,7 +14,6 @@ pipeline {
     }
 
     stages {
-
         stage('Git Checkout') {
             when {
                 expression { params.action == 'create' }
@@ -168,23 +167,10 @@ pipeline {
                 script {
                     def ecrImageName = "${params.AWS_ACCOUNT_ID}.dkr.ecr.${params.REGION}.amazonaws.com/${params.ECR_REPO_NAME}:${params.ImageTag}"
                     echo "Pushing Docker image to AWS ECR: ${ecrImageName}"
+                    // Tagging the image with the ECR repository name
                     sh "docker tag ${params.ImageName}:${params.ImageTag} ${ecrImageName}"
+                    // Pushing the image to AWS ECR
                     sh "docker push ${ecrImageName}"
-                }
-            }
-        }
-
-        stage('Cleanup Docker') {
-            when {
-                expression { params.action == 'create' }
-            }
-            steps {
-                script {
-                    echo 'Cleaning up Docker images...'
-                    dockerCleanup(
-                        ImageName: params.ImageName,
-                        ImageTag: params.ImageTag
-                    )
                 }
             }
         }
@@ -202,3 +188,4 @@ pipeline {
         }
     }
 }
+ 

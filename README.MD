@@ -288,3 +288,9 @@ CMD ["java", "-jar", "app.jar"]
 ---------------------------------------------------------------------------------------------------------------------------------------------------
 aws configure
 aws sts get-caller-identity
+aws ecr get-login-password --region us-east-2 | docker login --username AWS --password-stdin 131664697495.dkr.ecr.us-east-2.amazonaws.com
+docker exec -it 72a9d8671613 /bin/bash
+
+docker tag vishal:latest 131664697495.dkr.ecr.us-east-2.amazonaws.com/vishal:latest
+
+docker push 131664697495.dkr.ecr.us-east-2.amazonaws.com/vishal:latest
