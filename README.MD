@@ -1,3 +1,52 @@
+git init
+git add .
+git commit -m "Initial commit"
+#to check
+git remote -v
+git remote remove origin
+git remote add origin https://github.com/vishal1142/Fullcicd.git
+git branch
+
+git rm --cached jenkins-user_credentials.csv
+echo "jenkins-user_credentials.csv" >> .gitignore
+git add .gitignore
+git commit -m "Remove secrets and update .gitignore"
+git push -u origin main
+git push -u origin main --force
+git lfs install
+git lfs track "*.exe"
+
+git add .gitattributes
+git add eks_module/.terraform/providers/registry.terraform.io/hashicorp/aws/3.76.1/windows_amd64/terraform-provider-aws_v3.76.1_x5.exe
+git commit -m "Track large .exe file using Git LFS"
+
+# Remove the file from Git history (not just current commit)
+
+git rm --cached -r eks_module/.terraform
+git commit -m "Remove .terraform and large files from Git tracking"
+
+# If the large .exe file was added in a previous commit, run this to clean history:
+git filter-repo --path .terraform --invert-paths
+
+# If you don’t have git filter-repo, install it:
+brew install git-filter-repo  # macOS
+sudo apt install git-filter-repo  # Ubuntu/Debian
+
+# . Force push cleaned repo
+git push origin --force
+
+# Alternative (if you prefer to start clean)
+# If you don’t mind starting fresh:
+
+rm -rf .git
+git init
+echo ".terraform/" >> .gitignore
+echo "*.exe" >> .gitignore
+git add .
+git commit -m "Initial commit without .terraform"
+git remote add origin https://github.com/vishal1142/java.git
+git push -u origin main --force
+
 Access the Jenkins container:
 docker exec -u root -it <jenkins-container-id> bash
 apt-get update
@@ -237,4 +286,5 @@ COPY ./target/*.jar /app.jar
 CMD ["java", "-jar", "app.jar"]
 
 ---------------------------------------------------------------------------------------------------------------------------------------------------
-
+aws configure
+aws sts get-caller-identity
