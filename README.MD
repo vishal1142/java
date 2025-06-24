@@ -294,3 +294,15 @@ docker exec -it 72a9d8671613 /bin/bash
 docker tag vishal:latest 131664697495.dkr.ecr.us-east-2.amazonaws.com/vishal:latest
 
 docker push 131664697495.dkr.ecr.us-east-2.amazonaws.com/vishal:latest
+
+*******************************************************************************************************
+
+
+| Purpose                             | Why It's Needed                                                                              |
+| ----------------------------------- | -------------------------------------------------------------------------------------------- |
+| **Artifact Repository**             | Stores and manages JARs, WARs, libraries, and other build artifacts from Maven, Gradle, etc. |
+| **Docker Registry**                 | Acts as a private Docker registry for storing custom Docker images securely.                 |
+| **Centralized Artifact Management** | Keeps all artifacts in one place, with versioning and access control.                        |
+| **Build Optimization**              | Speeds up builds via local cache of dependencies instead of downloading from public repos.   |
+| **Security and Compliance**         | Prevents usage of unauthorized or vulnerable dependencies.                                   |
+| **Promotion & Staging**             | Enables artifact promotion through development, staging, and production stages.              |
