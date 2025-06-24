@@ -1,31 +1,46 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
-                             http://maven.apache.org/xsd/maven-4.0.0.xsd">
-
+                             http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.example</groupId>
     <artifactId>java-jenkins-demo</artifactId>
-    <version>1.0</version>
     <packaging>jar</packaging>
+    <version>1.0</version>
     <name>java-jenkins-demo</name>
 
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <sonar.projectKey>com.example:java-jenkins-demo</sonar.projectKey>
-        <sonar.host.url>http://localhost:9000</sonar.host.url>
-        <sonar.login>your-sonar-token</sonar.login>
+        <sonar.host.url>http://localhost:9000</sonar.host.url> <!-- Replace with your SonarQube URL -->
+        <sonar.login>your-sonar-token</sonar.login> <!-- Replace with your actual token -->
     </properties>
-
-    <distributionManagement>
-        <repository>
-            <id>nexus</id>
-            <name>Nexus Release Repository</name>
-            <url>http://localhost:8081/repository/maven-releases/</url>
-        </repository>
-    </distributionManagement>
 
     <dependencies>
         <dependency>
@@ -38,25 +53,18 @@
 
     <build>
         <plugins>
+            <!-- Maven Compiler Plugin -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.8.1</version>
                 <configuration>
-                    <source>${maven.compiler.source}</source>
-                    <target>${maven.compiler.target}</target>
+                    <source>1.8</source>
+                    <target>1.8</target>
                 </configuration>
             </plugin>
 
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-deploy-plugin</artifactId>
-                <version>3.1.1</version>
-                <configuration>
-                    <altDeploymentRepository>nexus::default::http://localhost:8081/repository/maven-releases/</altDeploymentRepository>
-                </configuration>
-            </plugin>
-
+            <!-- SonarQube Scanner Plugin -->
             <plugin>
                 <groupId>org.sonarsource.scanner.maven</groupId>
                 <artifactId>sonar-maven-plugin</artifactId>
@@ -64,5 +72,4 @@
             </plugin>
         </plugins>
     </build>
-
-</project>
+</project> -->
