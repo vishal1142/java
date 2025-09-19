@@ -16,7 +16,6 @@
         <maven.compiler.target>1.8</maven.compiler.target>
         <sonar.projectKey>com.example:java-jenkins-demo</sonar.projectKey>
         <sonar.host.url>http://172.20.10.2:9000</sonar.host.url>
-        <sonar.login>your-sonar-token</sonar.login>
     </properties>
 
     <distributionManagement>
