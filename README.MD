@@ -306,3 +306,12 @@ docker push 131664697495.dkr.ecr.us-east-2.amazonaws.com/vishal:latest
 | **Build Optimization**              | Speeds up builds via local cache of dependencies instead of downloading from public repos.   |
 | **Security and Compliance**         | Prevents usage of unauthorized or vulnerable dependencies.                                   |
 | **Promotion & Staging**             | Enables artifact promotion through development, staging, and production stages.              |
+
+
+
+**************************************************************
+
+MOST COMMON ERRORS
+
+1. NEED TO CHANGE SINAR IP in Jenkins settings, jenkinsfile and pom.xml
+2. Docker  permission denied while trying to connect to the Docker daemon socket at unix:///var/run/docker.sock = follow above points
