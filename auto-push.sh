@@ -5,6 +5,14 @@
 # For: https://github.com/vishal1142/java.git
 # -----------------------------------------
 
+# -----------------------------------------------------------
+# 1️⃣ Ensure correct remote
+# -----------------------------------------------------------
+REPO_URL="https://github.com/vishal1142/java.git"
+git remote set-url origin "$REPO_URL"
+echo "✅ Remote set to: $REPO_URL"
+
+
 # Set repository URL
 REPO_URL="https://github.com/vishal1142/java.git"
 
