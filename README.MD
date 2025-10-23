@@ -315,3 +315,21 @@ MOST COMMON ERRORS
 
 1. NEED TO CHANGE SINAR IP in Jenkins settings, jenkinsfile and pom.xml
 2. Docker  permission denied while trying to connect to the Docker daemon socket at unix:///var/run/docker.sock = follow above points
+
+
+git path
+git rev-parse --show-toplevel
+
+Repository name from Git config
+git config --get remote.origin.url
+
+git remote get-url origin | sed 's/.*\/\([^ ]*\)\.git/\1/'
+
+
+git status
+
+git log --oneline -10
+
+git diff
+
+git diff --staged
