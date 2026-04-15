@@ -1,16 +1,22 @@
 @Library('jenkinslibrary@master') _
 
 pipeline {
-    agent any
+    agent { label 'docker-agent' }
+
+    options {
+        skipDefaultCheckout(true)
+    }
 
     parameters {
         choice(name: 'action', choices: ['create', 'delete'], description: 'Choose create or delete')
         string(name: 'ImageName', defaultValue: 'vishal', description: 'Name of the Docker image')
         string(name: 'ImageTag', defaultValue: 'latest', description: 'Tag of the Docker image')
         string(name: 'DockerHubUser', defaultValue: 'awsdevops12345', description: 'DockerHub username')
+        string(name: 'DockerHubCredId', defaultValue: 'vishal', description: 'Jenkins credential id for DockerHub (username/password)')
         string(name: 'AWS_ACCOUNT_ID', defaultValue: '131664697495', description: 'AWS Account ID')
         string(name: 'REGION', defaultValue: 'us-east-2', description: 'AWS Region')
         string(name: 'ECR_REPO_NAME', defaultValue: 'vishal', description: 'ECR Repository Name')
+        string(name: 'SonarHostUrl', defaultValue: 'http://localhost:9000', description: 'SonarQube server URL')
     }
 
     stages {
@@ -23,7 +29,8 @@ pipeline {
                     echo 'Checking out source code...'
                     gitCheckout(
                         branch: 'main',
-                        url: 'https://github.com/vishal1142/java.git'
+                        url: 'https://github.com/vishal1142/java.git',
+                        credentialsId: 'github-pat'
                     )
                 }
             }
@@ -62,7 +69,7 @@ pipeline {
                     echo 'Performing static code analysis with SonarQube...'
                     staticCodeAnalysis(
                         credentialsId: 'sonarqube-api',
-                        sonarHostUrl: 'http://172.20.10.2:9000',
+                        sonarHostUrl: params.SonarHostUrl,
                         sonarProjectKey: 'java-jenkins-demo',
                         sonarProjectName: 'Java Jenkins Demo',
                         sonarProjectVersion: '1.0'
@@ -138,7 +145,8 @@ pipeline {
                     DockerImagePush(
                         params.ImageName,
                         params.ImageTag,
-                        params.DockerHubUser
+                        params.DockerHubUser,
+                        params.DockerHubCredId
                     )
                 }
             }
@@ -167,8 +175,8 @@ pipeline {
                 script {
                     def ecrImageName = "${params.AWS_ACCOUNT_ID}.dkr.ecr.${params.REGION}.amazonaws.com/${params.ECR_REPO_NAME}:${params.ImageTag}"
                     echo "Pushing Docker image to AWS ECR: ${ecrImageName}"
-                    // Tagging the image with the ECR repository name
-                    sh "docker tag ${params.ImageName}:${params.ImageTag} ${ecrImageName}"
+                    // Tag image that was built/pushed as dockerhubuser/name:tag
+                    sh "docker tag ${params.DockerHubUser}/${params.ImageName}:${params.ImageTag} ${ecrImageName}"
                     // Pushing the image to AWS ECR
                     sh "docker push ${ecrImageName}"
                 }
