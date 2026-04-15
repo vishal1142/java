@@ -16,7 +16,7 @@ pipeline {
         string(name: 'AWS_ACCOUNT_ID', defaultValue: '131664697495', description: 'AWS Account ID')
         string(name: 'REGION', defaultValue: 'us-east-2', description: 'AWS Region')
         string(name: 'ECR_REPO_NAME', defaultValue: 'vishal', description: 'ECR Repository Name')
-        string(name: 'SonarHostUrl', defaultValue: 'http://localhost:9000', description: 'SonarQube server URL')
+        string(name: 'SonarHostUrl', defaultValue: 'http://code-analyzer:9000', description: 'SonarQube server URL (use code-analyzer:9000 from Jenkins container on compose network)')
     }
 
     stages {
