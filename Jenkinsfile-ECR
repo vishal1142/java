@@ -1,7 +1,7 @@
 @Library('jenkinslibrary@master') _
 
 pipeline {
-    agent { label 'docker-agent' }
+    agent any
 
     options {
         skipDefaultCheckout(true)
